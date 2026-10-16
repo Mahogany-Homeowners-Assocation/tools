@@ -4,16 +4,280 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Halloween Howl – Magic Show Registration</title>
+  <link rel="icon" href="https://mahoganyhoa.com/wp-content/uploads/2026/10/Square-34.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 60px 20px; color: #1d1d1d; }
-    h1 { color: #6a3d8f; }
-    a.btn { display: inline-block; background: #f3742d; color: #1d1d1d; font-weight: bold;
-            text-decoration: none; padding: 16px 32px; border-radius: 8px; margin-top: 16px; }
+    :root { --bg:#ffffff; --ink:#1d1d1d; --purple:#6a3d8f; --purple-dark:#491f6c; --purple-line:#9e73c2; --orange:#f3742d; --orange-light:#ffb07a; --on:#ffffff; --onmuted:#e6dcf2; --ok:#8cf0b8; --bad:#ffa3ae; --warn:#ffd27a; --line:rgba(255,255,255,.28); }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family: 'Lora', Georgia, serif; line-height:1.5; }
+    .top { background:var(--purple-dark); border-bottom:4px solid var(--orange); padding:14px 16px; text-align:center; }
+    .top img { max-width:260px; width:70%; height:auto; display:inline-block; }
+    .wrap { max-width:920px; margin:0 auto; padding:22px 16px 48px; }
+    h1 { text-align:center; font-family:'Roboto',sans-serif; font-size:2rem; font-weight:700; margin:6px 0 4px; color:var(--purple); }
+    .sub { text-align:center; font-family:'Roboto',sans-serif; color:var(--ink); margin-bottom:4px; font-weight:500; }
+    .when { text-align:center; color:#4c4364; margin-bottom:22px; font-size:.95rem; }
+    .card { background:var(--purple); color:var(--on); border:2px solid var(--purple-line); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 3px 10px rgba(73,31,108,.25); }
+    h2 { font-size:1.05rem; margin:0 0 12px; color:var(--orange-light); text-transform:uppercase; letter-spacing:1px; font-family:'Roboto',sans-serif; font-weight:700; }
+    label.f { display:block; font-family:'Roboto',sans-serif; font-size:.85rem; color:var(--onmuted); margin:10px 0 4px; }
+    input[type=text], input[type=email] { width:100%; padding:12px; font-size:1rem; font-family:'Roboto',sans-serif; border-radius:8px; border:2px solid transparent; background:#ffffff; color:var(--ink); }
+    input:focus { outline:3px solid var(--orange-light); }
+    .hint { font-family:'Roboto',sans-serif; font-size:.8rem; color:var(--onmuted); margin-top:6px; }
+    .guest-row { display:flex; gap:8px; margin-bottom:8px; }
+    .guest-row input { flex:1; }
+    button { font-family:'Roboto',sans-serif; cursor:pointer; border:0; border-radius:8px; font-size:1rem; }
+    .btn-small { background:transparent; color:#ffffff; border:2px dashed var(--orange-light); padding:10px 14px; }
+    .btn-x { background:rgba(255,255,255,.2); color:#ffffff; padding:0 14px; }
+    .btn-main { width:100%; background:var(--orange); color:#1d1d1d; font-weight:700; text-transform:uppercase; letter-spacing:.5px; padding:16px 32px; margin-top:6px; box-shadow:0 2px 6px rgba(0,0,0,.3); }
+    .btn-main:hover:not(:disabled) { background:#ff8744; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .show { display:flex; align-items:center; gap:12px; border:2px solid var(--purple-line); border-radius:10px; padding:12px; margin-bottom:10px; cursor:pointer; font-family:'Roboto',sans-serif; background:var(--purple-dark); }
+    .show.selected { border-color:var(--orange); background:#5a2a82; }
+    .show.full { opacity:.65; cursor:not-allowed; }
+    .show input { width:20px; height:20px; accent-color: var(--orange); }
+    .show .info { flex:1; }
+    .show .name { font-weight:700; }
+    .show .time { color:var(--onmuted); font-size:.9rem; }
+    .meter { height:6px; background:rgba(255,255,255,.25); border-radius:4px; margin-top:8px; overflow:hidden; }
+    .meter div { height:100%; background:var(--ok); }
+    .seats { font-size:.85rem; text-align:right; white-space:nowrap; font-weight:700; }
+    .low { color:var(--warn); } .none { color:var(--bad); } .good { color:var(--ok); }
+    #party { font-family:'Roboto',sans-serif; text-align:center; margin:4px 0 12px; color:var(--purple); }
+    #party b { color:var(--ink); }
+    .msg { padding:12px 14px; border-radius:10px; margin-bottom:12px; font-family:'Roboto',sans-serif; }
+    .msg.err { background:#fdecee; border:2px solid #c92a3c; color:#7a1420; }
+    .results div { padding:8px 0; border-bottom:1px solid var(--line); font-family:'Roboto',sans-serif; }
+    .results div:last-child { border:0; }
+    .intro { text-align:center; white-space:pre-line; margin:0 auto 20px; max-width:760px; }
+    .closed { text-align:center; white-space:pre-line; font-size:1.05rem; }
+    a { color:var(--purple); }
+    .hidden { display:none; }
   </style>
 </head>
 <body>
-  <h1>🎃 Halloween Howl 🎃</h1>
-  <p>Magic Show Registration</p>
-  <a class="btn" href="https://script.google.com/macros/s/AKfycbyhiUB682gGyE0u0qDmpLXd8Y5I8um1iMlt2xd0C6hBDw-6qYbusAs8Og_Oo5lt6vI6/exec">Register now</a>
+<div class="top hidden" id="top"><img id="logo" alt="Mahogany Homeowners Association"></div>
+<div class="wrap">
+  <h1>🎃 <span id="title">Halloween Howl</span> 🎃</h1>
+  <div class="sub" id="subtitle"></div>
+  <div class="when hidden" id="details"></div>
+  <div class="intro hidden" id="intro"></div>
+
+  <div id="loading" class="card">Loading…</div>
+  <div id="loadError" class="msg err hidden"></div>
+  <div id="closedView" class="card closed hidden"></div>
+
+  <div id="formView" class="hidden">
+    <div id="error" class="msg err hidden"></div>
+
+    <div class="card">
+      <h2>Who's registering?</h2>
+      <label class="f" for="name">Your first name</label>
+      <input type="text" id="name" autocomplete="given-name" maxlength="60">
+      <label class="f" for="email">Email (for your confirmation)</label>
+      <input type="email" id="email" autocomplete="email">
+    </div>
+
+    <div class="card" id="guestCard">
+      <h2>Guests</h2>
+      <div class="hint" id="guestHint" style="margin:0 0 10px"></div>
+      <div id="guests"></div>
+      <button type="button" class="btn-small" id="addGuest">+ Add a guest</button>
+    </div>
+
+    <div class="card">
+      <h2>Choose your show(s)</h2>
+      <div id="shows">Loading shows…</div>
+      <div class="hint">You can pick more than one. Seat counts update live.</div>
+    </div>
+
+    <div id="party"></div>
+    <button class="btn-main" id="submit" disabled>Register</button>
+  </div>
+
+  <div id="doneView" class="hidden">
+    <div class="card">
+      <h2 id="doneTitle">You're registered!</h2>
+      <div id="doneBody" class="results"></div>
+      <p class="hint" id="doneNote"></p>
+    </div>
+    <button class="btn-main" id="again">Register another household</button>
+  </div>
+
+  <div class="when hidden" id="contact" style="margin-top:18px"></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+  const API = window.HOWL_API_URL;
+  let S = null;               // public settings
+  let shows = [];
+  let selected = new Set();
+
+  const $ = id => document.getElementById(id);
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+  // ---- talking to Apps Script
+  function loadPublic() {
+    return fetch(API + '?action=public').then(r => r.json()).then(j => {
+      if (!j.ok) throw new Error(j.error || 'Could not load.');
+      return j;
+    });
+  }
+  function post(body) {
+    return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+      .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error || 'Something went wrong.'); return j.data; });
+  }
+
+  // ---- page setup
+  function applySettings(d) {
+    S = d.settings;
+    shows = d.shows || [];
+    document.title = S.eventName + ' – ' + S.pageSubtitle;
+    $('title').textContent = S.eventName;
+    $('subtitle').textContent = S.pageSubtitle;
+    if (S.eventDetails) { $('details').textContent = S.eventDetails; $('details').classList.remove('hidden'); }
+    if (S.introText) { $('intro').textContent = S.introText; $('intro').classList.remove('hidden'); }
+    if (S.logoUrl && /^https?:\/\//i.test(S.logoUrl)) { $('logo').src = S.logoUrl; $('top').classList.remove('hidden'); }
+    if (S.contactEmail) {
+      const c = $('contact'); c.textContent = 'Questions? ';
+      const a = document.createElement('a'); a.href = 'mailto:' + S.contactEmail; a.textContent = S.contactEmail;
+      c.appendChild(a); c.classList.remove('hidden');
+    }
+    $('loading').classList.add('hidden');
+    if (!S.registrationOpen) { $('closedView').textContent = S.closedMessage; $('closedView').classList.remove('hidden'); return; }
+    if (S.maxGuests > 0) {
+      $('guestHint').textContent = 'First names only. Up to ' + S.maxGuests + ' guest' + (S.maxGuests === 1 ? '' : 's') +
+        ' per household' + (S.registrantCounts ? ' (not counting you).' : '.');
+    } else { $('guestCard').classList.add('hidden'); }
+    $('formView').classList.remove('hidden');
+    renderAll();
+  }
+
+  function fatal(msg) {
+    $('loading').classList.add('hidden');
+    const e = $('loadError'); e.textContent = msg; e.classList.remove('hidden');
+  }
+
+  // ---- form logic
+  function guestCount() { return document.querySelectorAll('#guests input').length; }
+  function partySize() {
+    const named = [...document.querySelectorAll('#guests input')].filter(i => i.value.trim()).length;
+    return named + (S.registrantCounts ? 1 : 0);
+  }
+
+  function addGuest() {
+    if (guestCount() >= S.maxGuests) return;
+    const row = document.createElement('div');
+    row.className = 'guest-row';
+    row.innerHTML = '<input type="text" placeholder="Guest first name" maxlength="60" autocomplete="off">' +
+                    '<button type="button" class="btn-x" aria-label="Remove guest">✕</button>';
+    row.querySelector('input').addEventListener('input', renderAll);
+    row.querySelector('button').addEventListener('click', () => { row.remove(); renderAll(); });
+    $('guests').appendChild(row);
+    renderAll();
+    row.querySelector('input').focus();
+  }
+
+  function renderAll() {
+    $('addGuest').classList.toggle('hidden', guestCount() >= S.maxGuests);
+    const p = partySize();
+    $('party').innerHTML = 'Your party: <b>' + p + '</b> ' + (p === 1 ? 'person' : 'people');
+    renderShows();
+    updateSubmit();
+  }
+
+  function renderShows() {
+    if (!shows.length) { $('shows').textContent = 'No shows are open right now.'; return; }
+    const p = partySize();
+    const box = $('shows');
+    box.innerHTML = '';
+    shows.forEach(s => {
+      const fits = s.remaining >= p;
+      if (!fits) selected.delete(s.id);
+      const pct = s.capacity ? Math.min(100, Math.round(100 * s.taken / s.capacity)) : 100;
+      let cls = 'good', txt = s.remaining + ' seats left';
+      if (s.remaining === 0) { cls = 'none'; txt = 'Full'; }
+      else if (!fits) { cls = 'none'; txt = 'Only ' + s.remaining + ' left – too small for your party'; }
+      else if (s.remaining <= S.lowSeatsThreshold) { cls = 'low'; txt = 'Only ' + s.remaining + ' left!'; }
+      const el = document.createElement('label');
+      el.className = 'show' + (selected.has(s.id) ? ' selected' : '') + (fits ? '' : ' full');
+      el.innerHTML = '<input type="checkbox" ' + (selected.has(s.id) ? 'checked ' : '') + (fits ? '' : 'disabled ') + '>' +
+        '<div class="info"><div class="name">' + esc(s.name) + '</div><div class="time">' + esc(s.time) + '</div>' +
+        '<div class="meter"><div style="width:' + pct + '%;background:' + (s.remaining <= S.lowSeatsThreshold ? 'var(--bad)' : 'var(--ok)') + '"></div></div></div>' +
+        '<div class="seats ' + cls + '">' + esc(txt) + '</div>';
+      el.querySelector('input').addEventListener('change', e => {
+        e.target.checked ? selected.add(s.id) : selected.delete(s.id);
+        renderShows(); updateSubmit();
+      });
+      box.appendChild(el);
+    });
+  }
+
+  function updateSubmit() { $('submit').disabled = selected.size === 0; }
+
+  function showError(msg) {
+    const e = $('error');
+    e.textContent = msg; e.classList.toggle('hidden', !msg);
+    if (msg) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function refreshShows() {
+    loadPublic().then(d => { shows = d.shows || []; if (S.registrationOpen) renderAll(); }).catch(() => {});
+  }
+
+  $('submit').addEventListener('click', () => {
+    showError('');
+    const payload = {
+      name: $('name').value,
+      email: $('email').value,
+      guests: [...document.querySelectorAll('#guests input')].map(i => i.value).filter(v => v.trim()),
+      showIds: [...selected],
+    };
+    $('submit').disabled = true; $('submit').textContent = 'Registering…';
+    post({ action: 'submit', payload: payload })
+      .then(res => {
+        $('submit').textContent = 'Register';
+        if (!res.results.length) { showError(res.message); updateSubmit(); return; }
+        showDone(res);
+      })
+      .catch(() => {
+        $('submit').textContent = 'Register'; updateSubmit();
+        showError('Something went wrong. Please try again.');
+      });
+  });
+
+  function showDone(res) {
+    $('formView').classList.add('hidden');
+    $('doneView').classList.remove('hidden');
+    $('doneTitle').textContent = res.ok ? res.message : 'Not registered';
+    $('doneBody').innerHTML = res.results.map(r => {
+      const icon = r.status === 'confirmed' ? '✅' : '⚠️';
+      return '<div>' + icon + ' <b>' + esc(r.showName || r.showId) + '</b>' +
+        (r.showTime ? ' – ' + esc(r.showTime) : '') +
+        (r.status !== 'confirmed' ? '<br><span class="hint">' + esc(r.message) + '</span>' : '') + '</div>';
+    }).join('');
+    $('doneNote').textContent = res.ok
+      ? 'Party size: ' + res.partySize + '. ' + (res.emailed ? 'A confirmation email is on its way. ' : '') + 'Confirmation # ' + res.regId + '.'
+      : 'Please go back and choose a different show.';
+    window.scrollTo({ top: 0 });
+  }
+
+  $('again').addEventListener('click', () => {
+    $('doneView').classList.add('hidden');
+    $('formView').classList.remove('hidden');
+    $('name').value = ''; $('email').value = ''; $('guests').innerHTML = '';
+    selected.clear(); refreshShows(); renderAll();
+  });
+
+  $('addGuest').addEventListener('click', addGuest);
+
+  // ---- start
+  if (!API || API.indexOf('PASTE_') === 0) {
+    fatal('This page is not connected yet. The address in config.js still needs to be filled in.');
+  } else {
+    loadPublic().then(applySettings).catch(() => fatal('Could not load registration. Please refresh the page.'));
+    setInterval(() => { if (S && S.registrationOpen && !$('formView').classList.contains('hidden')) refreshShows(); }, 30000);
+  }
+</script>
 </body>
 </html>
