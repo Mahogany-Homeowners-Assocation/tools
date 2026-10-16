@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Admin – Halloween Howl</title>
+  <link rel="icon" href="https://mahoganyhoa.com/wp-content/uploads/2026/10/Square-34.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --purple:#6a3d8f; --dark:#491f6c; --line:#9e73c2; --orange:#f3742d; --light:#f3ecf9; --ink:#1d1d1d; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#fff; color:var(--ink); font-family:'Roboto',sans-serif; line-height:1.45; }
+    header { background:var(--dark); color:#fff; padding:14px 16px; border-bottom:4px solid var(--orange); }
+    header b { font-size:1.1rem; } header span { opacity:.8; margin-left:8px; }
+    .wrap { max-width:900px; margin:0 auto; padding:18px 16px 60px; }
+    h2 { color:var(--purple); margin:0 0 10px; }
+    h3 { color:var(--dark); margin:18px 0 8px; }
+    .card { border:2px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px; background:var(--light); }
+    .login { max-width:380px; margin:40px auto; }
+    label { display:block; font-size:.85rem; font-weight:700; color:var(--dark); margin:12px 0 4px; }
+    .help { font-weight:400; color:#5b4b73; font-size:.8rem; margin-top:2px; }
+    input[type=text], input[type=password], input[type=number], textarea { width:100%; padding:10px; font:inherit; border:2px solid #cdbbe3; border-radius:8px; background:#fff; }
+    textarea { min-height:90px; resize:vertical; }
+    input:focus, textarea:focus { outline:3px solid #ffb07a; }
+    button { font:inherit; font-weight:700; cursor:pointer; border:0; border-radius:8px; padding:10px 18px; background:var(--purple); color:#fff; }
+    button.orange { background:var(--orange); color:#1d1d1d; text-transform:uppercase; letter-spacing:.4px; }
+    button.ghost { background:#fff; color:var(--purple); border:2px solid var(--purple); }
+    button.small { padding:5px 10px; font-size:.8rem; }
+    button.danger { background:#fff; color:#b3202f; border:2px solid #b3202f; }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+    .tabs button { background:#fff; color:var(--purple); border:2px solid var(--purple); }
+    .tabs button.on { background:var(--purple); color:#fff; }
+    .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:18px; background:#1d1d1d; color:#fff; padding:10px 18px; border-radius:8px; z-index:9; max-width:90%; }
+    .toast.err { background:#b3202f; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .row > * { flex:1 1 140px; }
+    .check { display:flex; gap:10px; align-items:flex-start; margin-top:12px; }
+    .check input { width:20px; height:20px; margin-top:2px; accent-color:var(--orange); }
+    .check label { margin:0; }
+    table { width:100%; border-collapse:collapse; font-size:.92rem; background:#fff; }
+    th { background:var(--purple); color:#fff; text-align:left; padding:8px; }
+    td { padding:8px; border-bottom:1px solid #e3d8ef; vertical-align:top; }
+    tr.cx td { color:#999; text-decoration:line-through; background:#f3f3f3; }
+    .meter { height:8px; background:#e3d8ef; border-radius:5px; overflow:hidden; margin-top:4px; }
+    .meter div { height:100%; background:#2e9b63; }
+    .hidden { display:none; }
+    .showrow { display:grid; grid-template-columns:2fr 2fr 90px 80px; gap:8px; align-items:end; margin-bottom:10px; }
+    @media (max-width:600px){ .showrow { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+<header><b>🎃 Admin</b><span>Registration settings &amp; guest list</span></header>
+<div class="wrap">
+
+  <!-- LOGIN -->
+  <div id="loginView" class="card login">
+    <h2>Admin login</h2>
+    <label for="pass">Passcode</label>
+    <input type="password" id="pass" autocomplete="current-password">
+    <p><button class="orange" id="loginBtn" style="width:100%">Log in</button></p>
+    <div class="help">Forgot it? Anyone with edit access to the registration Google Sheet can reset it from the <b>Halloween Howl</b> menu → Reset admin passcode.</div>
+  </div>
+
+  <!-- APP -->
+  <div id="appView" class="hidden">
+    <div class="tabs" id="tabs">
+      <button data-t="regs" class="on">Registrations</button>
+      <button data-t="shows">Shows &amp; capacity</button>
+      <button data-t="settings">Wording &amp; limits</button>
+      <button data-t="security">Passcode &amp; help</button>
+    </div>
+
+    <div id="t_regs"></div>
+
+    <div id="t_shows" class="hidden">
+      <div class="card">
+        <h2>Shows &amp; capacity</h2>
+        <div class="help" style="margin-bottom:10px">Capacity is the number of <b>people</b> (registrant + guests) the room holds. Shows can't be deleted once added — untick Active to hide one from the public form.</div>
+        <div id="showsList"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="ghost" id="addShow">+ Add a show</button>
+          <button class="orange" id="saveShows">Save shows</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="t_settings" class="hidden">
+      <div class="card">
+        <h2>Wording &amp; limits</h2>
+        <div id="settingsForm"></div>
+        <p><button class="orange" id="saveSettings">Save settings</button></p>
+      </div>
+    </div>
+
+    <div id="t_security" class="hidden">
+      <div class="card">
+        <h2>Change admin passcode</h2>
+        <label for="np">New passcode (8+ characters)</label>
+        <input type="password" id="np" autocomplete="new-password">
+        <p><button id="changePass">Change passcode</button></p>
+      </div>
+      <div class="card">
+        <h2>Staff tools &amp; help</h2>
+        <p><a id="sheetLink" target="_blank" rel="noopener">Open the registration Google Sheet</a> – full tracking, the Summary tab, and one <b>Check-In</b> tab per show for staff on the day.</p>
+        <p><button class="ghost" id="rebuild">Refresh Summary &amp; check-in lists</button></p>
+        <p class="help">Check-in tabs update automatically after every registration or cancellation. Ticked check-in boxes are kept when they refresh.</p>
+        <p class="help">All wording, limits and shows can also be edited directly on the <b>Settings</b> and <b>Shows</b> tabs of the Google Sheet.</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="toast" class="toast hidden"></div>
+
+<script src="../config.js"></script>
+<script>
+  const API = window.HOWL_API_URL;
+  let PASS = '', DATA = null, FILTER = '';
+  const $ = id => document.getElementById(id);
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  function toast(msg, err) { const t = $('toast'); t.textContent = msg; t.className = 'toast' + (err ? ' err' : ''); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.add('hidden'), 4000); }
+
+  // Sends one request to Apps Script. action = name of the server function.
+  function call(action, params, ok, btn) {
+    if (!API || API.indexOf('PASTE_') === 0) { toast('Not connected: fill in the address in config.js.', true); return; }
+    if (btn) btn.disabled = true;
+    fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                 body: JSON.stringify(Object.assign({ action: action }, params)) })
+      .then(r => r.json())
+      .then(j => { if (btn) btn.disabled = false; if (!j.ok) throw new Error(j.error || 'Something went wrong'); ok && ok(j.data); })
+      .catch(e => { if (btn) btn.disabled = false; toast(String((e && e.message) || 'Something went wrong').replace(/^Error:\s*/, ''), true); });
+  }
+
+  // ---- login
+  function login() {
+    PASS = $('pass').value;
+    call('adminGetAll', { pass: PASS }, d => {
+      DATA = d; $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); renderAll();
+    }, $('loginBtn'));
+  }
+  $('loginBtn').addEventListener('click', login);
+  $('pass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+
+  function reload(then) { call('adminGetAll', { pass: PASS }, d => { DATA = d; renderAll(); then && then(); }); }
+
+  // ---- tabs
+  $('tabs').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#tabs button').forEach(x => x.classList.toggle('on', x === b));
+    ['regs', 'shows', 'settings', 'security'].forEach(t => $('t_' + t).classList.toggle('hidden', t !== b.dataset.t));
+  });
+
+  function renderAll() { renderRegs(); renderShows(); renderSettings(); $('sheetLink').href = DATA.sheetUrl; }
+
+  // ---- registrations
+  function renderRegs() {
+    const box = $('t_regs');
+    const q = FILTER.toLowerCase();
+    let html = '<div class="card"><h2>Registrations</h2><div class="row"><input type="text" id="search" placeholder="Search by name, guest or email…" value="' + esc(FILTER) + '"></div></div>';
+    DATA.shows.forEach(s => {
+      const rows = DATA.registrations.filter(r => r.showId === s.id &&
+        (!q || [r.name, r.guests, r.email, r.regId].join(' ').toLowerCase().includes(q)));
+      const pct = s.capacity ? Math.min(100, Math.round(100 * s.taken / s.capacity)) : 100;
+      html += '<div class="card"><h3 style="margin-top:0">' + esc(s.name) + (s.active ? '' : ' <small>(hidden)</small>') + '</h3>' +
+        '<div>' + esc(s.time) + ' — <b>' + s.taken + '</b> of ' + s.capacity + ' people registered (' + Math.max(0, s.capacity - s.taken) + ' left)</div>' +
+        '<div class="meter"><div style="width:' + pct + '%"></div></div><div style="overflow-x:auto;margin-top:10px">' +
+        (rows.length ? '<table><tr><th>Registrant</th><th>Guests</th><th>Party</th><th>Email</th><th>Registered</th><th></th></tr>' +
+          rows.map(r => '<tr class="' + (r.status === 'Confirmed' ? '' : 'cx') + '"><td><b>' + esc(r.name) + '</b></td><td>' + esc(r.guests || '—') + '</td><td>' + esc(r.party) + '</td><td>' + esc(r.email) + '</td><td>' + esc(r.when) + '</td><td>' +
+            '<button class="small ' + (r.status === 'Confirmed' ? 'danger' : 'ghost') + '" data-reg="' + esc(r.regId) + '" data-show="' + esc(r.showId) + '" data-to="' + (r.status === 'Confirmed' ? 'Cancelled' : 'Confirmed') + '">' + (r.status === 'Confirmed' ? 'Cancel' : 'Restore') + '</button></td></tr>').join('') + '</table>'
+          : '<div class="help">No registrations to show.</div>') + '</div></div>';
+    });
+    box.innerHTML = html;
+    const s = $('search'); s.addEventListener('input', () => { FILTER = s.value; const pos = s.selectionStart; renderRegs(); const n = $('search'); n.focus(); n.setSelectionRange(pos, pos); });
+  }
+  $('t_regs').addEventListener('click', e => {
+    const b = e.target.closest('button[data-reg]'); if (!b) return;
+    if (b.dataset.to === 'Cancelled' && !confirm('Cancel this registration? Their seats will be released.')) return;
+    call('adminSetStatus', { pass: PASS, regId: b.dataset.reg, showId: b.dataset.show, status: b.dataset.to }, () => { toast('Updated.'); reload(); }, b);
+  });
+
+  // ---- shows
+  function renderShows() {
+    $('showsList').innerHTML = DATA.shows.map((s, i) => showRowHtml(s, i)).join('');
+  }
+  function showRowHtml(s, i) {
+    return '<div class="showrow" data-id="' + esc(s.id || '') + '">' +
+      '<div><label>Name</label><input type="text" class="s-name" value="' + esc(s.name) + '"></div>' +
+      '<div><label>Date / time</label><input type="text" class="s-time" value="' + esc(s.time) + '"></div>' +
+      '<div><label>Capacity</label><input type="number" min="0" class="s-cap" value="' + esc(s.capacity) + '"></div>' +
+      '<div class="check" style="margin:0 0 8px"><input type="checkbox" class="s-act" ' + (s.active !== false ? 'checked' : '') + '><label>Active</label></div></div>';
+  }
+  $('addShow').addEventListener('click', () => {
+    $('showsList').insertAdjacentHTML('beforeend', showRowHtml({ name: '', time: '', capacity: 50, active: true }));
+  });
+  $('saveShows').addEventListener('click', () => {
+    const shows = [...document.querySelectorAll('.showrow')].map(r => ({
+      id: r.dataset.id, name: r.querySelector('.s-name').value, time: r.querySelector('.s-time').value,
+      capacity: r.querySelector('.s-cap').value, active: r.querySelector('.s-act').checked }));
+    call('adminSaveShows', { pass: PASS, shows: shows }, m => { toast(m); reload(); }, $('saveShows'));
+  });
+
+  // ---- settings
+  function renderSettings() {
+    $('settingsForm').innerHTML = DATA.settings.map(s => {
+      if (s.type === 'bool') return '<div class="check"><input type="checkbox" id="st_' + s.key + '" ' + (s.value ? 'checked' : '') + '><label for="st_' + s.key + '">' + esc(s.label) + '<div class="help">' + esc(s.help) + '</div></label></div>';
+      const f = s.type === 'longtext' ? '<textarea id="st_' + s.key + '">' + esc(s.value) + '</textarea>'
+        : '<input type="' + (s.type === 'number' ? 'number' : 'text') + '" id="st_' + s.key + '" value="' + esc(s.value) + '">';
+      return '<label for="st_' + s.key + '">' + esc(s.label) + '<div class="help">' + esc(s.help) + '</div></label>' + f;
+    }).join('');
+  }
+  $('saveSettings').addEventListener('click', () => {
+    const v = {};
+    DATA.settings.forEach(s => { const el = $('st_' + s.key); v[s.key] = s.type === 'bool' ? el.checked : el.value; });
+    call('adminSaveSettings', { pass: PASS, values: v }, m => { toast(m); reload(); }, $('saveSettings'));
+  });
+
+  // ---- security / tools
+  $('changePass').addEventListener('click', () => {
+    const np = $('np').value;
+    call('adminChangePasscode', { pass: PASS, newPass: np }, m => { PASS = np; $('np').value = ''; toast(m); }, $('changePass'));
+  });
+  $('rebuild').addEventListener('click', () => call('adminRebuild', { pass: PASS }, m => toast(m), $('rebuild')));
+</script>
+</body>
+</html>
