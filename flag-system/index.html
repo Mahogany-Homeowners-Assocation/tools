@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mahogany Lake Flag System</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="https://mahoganyhoa.com/wp-content/uploads/2026/09/Square-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one centred column, header and cards share the same width. Each question appears below the previous one; the finished copy and graphics appear at the bottom. */
+:root {
+  --bg: #eaf2f7; --surface: #ffffff; --surface-2: #f3f8fb; --ink: #0f2839; --muted: #58707f;
+  --line: #d2e0e9; --line-soft: #e4edf3; --accent: #1b5e8a; --accent-ink: #ffffff;
+  --warn-bg: #fff3d6; --warn-ink: #6b4a00; --ok: #2c7d16; --err: #b3261e;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0a1822; --surface: #11283a; --surface-2: #0e2130; --ink: #e6f0f7; --muted: #92a9b9;
+    --line: #23404f; --line-soft: #1a3444; --accent: #5db2e6; --accent-ink: #06202f; --warn-bg: #3a2f10; --warn-ink: #f3d78a; --ok: #7fd05f; --err: #ff8a80; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); padding: 20px 16px 56px; }
+.wrap { max-width: 980px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+#steps { display: flex; flex-direction: column; gap: 16px; width: 100%; }
+h1, h2 { font-family: var(--font-display); margin: 0; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: 1.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: .01em; }
+h2 { font-size: 1.2rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+header { display: flex; flex-direction: column; gap: 4px; }
+header p { margin: 0; color: var(--muted); }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card[hidden] { display: none; }
+.card.enter { animation: rise .28s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .card.enter { animation: none; } html { scroll-behavior: auto; } }
+
+.q { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.q h2 { min-width: 0; }
+.q .sum, .q .chg { display: none; }
+.body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* a finished question folds into one line: number, question, answer, Change */
+.card.collapsed { padding-block: 12px; gap: 0; }
+.card.collapsed .body { display: none; }
+.card.collapsed .q { cursor: pointer; flex-wrap: nowrap; }
+.card.collapsed .q h2 { font-size: .95rem; flex: 0 1 auto; min-width: 0; color: var(--muted); }
+.card.collapsed .q .sum { display: block; flex: 1; min-width: 0; margin-left: 8px; font-weight: 600; overflow-wrap: anywhere; }
+.card.collapsed .q .chg { display: inline-block; flex: none; padding: 7px 12px; }
+@media (max-width: 560px) { .card.collapsed .q { flex-wrap: wrap; } .card.collapsed .q .sum { flex-basis: 100%; order: 3; margin-left: 42px; } }
+.num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font: 700 1rem/30px var(--font-display); text-align: center; }
+.card.done .num { background: var(--ok); color: #fff; }
+.help { margin: 0; color: var(--muted); font-size: .9rem; }
+
+/* single choice */
+.flags { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.flag-btn { appearance: none; border: 2px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: var(--radius); padding: 14px 6px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; font: 700 1.05rem/1 var(--font-display); letter-spacing: .05em; text-transform: uppercase; }
+.flag-btn .sw { width: 34px; height: 24px; border-radius: 3px 10px 3px 10px; background: var(--c); }
+.flag-btn small { font: 500 .75rem/1.2 var(--font-body); letter-spacing: 0; text-transform: none; color: var(--muted); }
+.flag-btn:hover { border-color: var(--c); }
+.flag-btn[aria-pressed="true"] { border-color: var(--c); background: var(--surface); box-shadow: 0 0 0 2px var(--c) inset; }
+
+/* multi choice */
+.opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .opts { grid-template-columns: minmax(0, 1fr); } }
+.opt { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); cursor: pointer; min-width: 0; }
+.opt:hover { border-color: var(--accent); }
+.opt input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; margin: 0; }
+.opt .n { flex: 1; min-width: 0; }
+.opt:has(input:checked) { background: var(--surface); border-color: var(--accent); }
+.tag { font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--warn-bg); color: var(--warn-ink); flex: none; }
+
+input[type="datetime-local"] { font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; width: 100%; min-width: 0; }
+label.lbl { font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.row { display: flex; gap: 8px; }
+.row > input { flex: 1; }
+
+button { font: 600 .9rem/1 var(--font-body); }
+.btn { appearance: none; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); padding: 10px 16px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.foot { display: flex; justify-content: flex-end; }
+:where(button, input, textarea):focus-visible, .opt:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+/* website preview + code */
+.webprev { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 18px; overflow-x: auto; min-width: 0; }
+details.code { min-width: 0; max-width: 100%; }
+details.code summary { cursor: pointer; font-weight: 600; color: var(--accent); width: fit-content; }
+details.code pre { margin: 10px 0 0; padding: 12px; max-height: 320px; overflow: auto; background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; user-select: all; }
+/* result: each output is its own section, separated by a very light rule and generous space */
+#result { gap: 0; }
+.rsec { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding-block: 28px; border-top: 1px solid var(--line-soft); }
+.rsec:first-child { padding-top: 0; border-top: 0; }
+.rsec:last-child { padding-bottom: 0; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.pill { display: inline-block; font: 700 .9rem/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; padding: 5px 10px; border-radius: 999px; background: var(--c); color: var(--ink-c); }
+.summary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.notice { border-radius: 6px; padding: 9px 12px; font-size: .9rem; background: var(--warn-bg); color: var(--warn-ink); }
+.notice[hidden] { display: none; }
+.notice.err { color: var(--err); }
+.gfx { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr); gap: 20px; align-items: start; }
+.gfx.n3 { grid-template-columns: minmax(0, 5.7fr) minmax(0, 4.3fr); }   /* column widths chosen so the tall Instagram image and the stacked website + Facebook images end at about the same height */
+.gfx.n3 figure:first-child { grid-row: span 2; }
+@media (max-width: 700px) { .gfx, .gfx.n3 { grid-template-columns: minmax(0, 1fr); } .gfx.n3 figure:first-child { grid-row: auto; } }
+@media (max-width: 560px) { .flags { gap: 6px; } }
+.gfx figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.gfx .ph, .gfx img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); }
+.gfx .ph { aspect-ratio: var(--ar); display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: .85rem; text-align: center; padding: 8px; }
+.gfx figcaption { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); }
+.copybox { background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 14px; overflow-wrap: anywhere; display: flex; flex-direction: column; gap: 12px; }
+.copybox p { margin: 0; white-space: pre-line; }
+.copybox p.strong, .copybox b { font-weight: 600; }
+.copybox .hz-name { font-weight: 700; font-style: italic; }
+mark.tbd { background: var(--warn-bg); color: var(--warn-ink); padding: 0 3px; border-radius: 3px; font-weight: 600; }
+.meta { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+#toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 6px; font-weight: 600; max-width: calc(100% - 32px); opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 10; }
+#toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow" id="eyebrow">Seasonal Lake Flag System</span>
+    <h1>Mahogany Lake Flag System</h1>
+    <p>Answer each question. The social caption, website copy and graphics appear below as soon as you have answered.</p>
+  </header>
+
+  <div class="notice" id="loading">Loading…</div>
+  <div id="steps"></div>
+
+  <!-- RESULT -->
+  <section class="card" id="result" hidden aria-live="polite">
+    <div class="rsec">
+      <div class="head">
+        <h2>Your flag update</h2>
+        <div class="summary" id="summary"></div>
+      </div>
+      <div class="notice" id="notice" role="status" hidden></div>
+      <div class="field">
+        <label class="lbl" for="updated">Last updated</label>
+        <div class="row">
+          <input type="datetime-local" id="updated">
+          <button class="btn ghost" type="button" id="nowBtn">Now</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="rsec">
+      <h2>Graphics</h2>
+      <div class="gfx" id="gfx"></div>
+    </div>
+
+    <div class="rsec">
+      <div class="head">
+        <h2>Social media caption</h2>
+        <div class="actions"><button class="btn" type="button" id="copyCaption">Copy caption</button></div>
+      </div>
+      <div class="copybox" id="captionBox"></div>
+      <span class="meta" id="captionMeta"></span>
+    </div>
+
+    <div class="rsec">
+      <div class="head">
+        <h2>Website copy</h2>
+        <div class="actions"><button class="btn" type="button" id="copyWebHtml">Copy HTML code</button></div>
+      </div>
+      <p class="help">Paste into an Elementor HTML widget. The preview shows how it will look.</p>
+      <div class="webprev" id="webPrev"></div>
+      <details class="code">
+        <summary>View HTML code</summary>
+        <pre id="webCode"></pre>
+      </details>
+    </div>
+
+    <div class="rsec">
+      <div class="foot"><button class="btn ghost" type="button" id="restart">Start over</button></div>
+    </div>
+  </section>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  var CONFIG = null;
+  var answers = {};            // stepId -> value (string | array)
+    var updated = '';            // datetime-local string
+  var collapsed = {};          // stepId -> true when a finished question is folded into one line
+  var timers = {};             // stepId -> pending auto-fold timer (multi-select questions)
+  var shown = {};              // stepId -> true after first reveal (for animation)
+  var gfxCache = {};           // file name -> { dataUrl, base64, mimeType }
+  var out = null;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var TBD_RE = /\[Copy to be added[^\]]*\]/g;
+
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    Object.keys(attrs || {}).forEach(function (k) { k === 'class' ? (e.className = attrs[k]) : e.setAttribute(k, attrs[k]); });
+    [].concat(kids === undefined ? [] : kids).forEach(function (k) { e.append(k); });
+    return e;
+  }
+  function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function fill(t) { return t.split('{lake}').join(CONFIG.SHARED.lake); }
+  function marked(text) {
+    var nodes = [], last = 0, m; TBD_RE.lastIndex = 0;
+    while ((m = TBD_RE.exec(text))) {
+      if (m.index > last) nodes.push(text.slice(last, m.index));
+      nodes.push(el('mark', { class: 'tbd' }, m[0])); last = m.index + m[0].length;
+    }
+    if (last < text.length) nodes.push(text.slice(last));
+    return nodes;
+  }
+
+  /* ---------------- flow engine ---------------- */
+  function stepById(id) { return CONFIG.STEPS.filter(function (s) { return s.id === id; })[0]; }
+  function matches(step) {
+    if (!step.showIf) return true;
+    return Object.keys(step.showIf).every(function (k) { return answers[k] === step.showIf[k]; });
+  }
+  function complete(step) {
+    var a = answers[step.id];
+    if (step.type === 'single') return !!a;
+    return !!(a && a.length > 0);        // multi: at least one option ticked
+  }
+  function visibleSteps() {           // steps unlocked so far, in order
+    var list = [];
+    for (var i = 0; i < CONFIG.STEPS.length; i++) {
+      var s = CONFIG.STEPS[i];
+      if (!matches(s)) continue;
+      list.push(s);
+      if (!complete(s)) break;
+    }
+    return list;
+  }
+  function allComplete() {
+    return CONFIG.STEPS.every(function (s) { return !matches(s) || complete(s); });
+  }
+  function resetAfter(stepId) {       // an earlier answer changed: clear the answers that depend on it
+    var idx = CONFIG.STEPS.map(function (s) { return s.id; }).indexOf(stepId);
+    CONFIG.STEPS.slice(idx + 1).forEach(function (s) {
+      collapsed[s.id] = false; clearTimeout(timers[s.id]);
+      if (s.type === 'multi') answers[s.id] = [];
+      if (s.type === 'single') answers[s.id] = null;
+    });
+  }
+
+  /* ---------------- copy composition ---------------- */
+  function hazardPool() { return CONFIG.HAZARDS; }
+  function formatUpdated(v) {
+    var m = /^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)/.exec(v || '');
+    if (!m) return '[Current Date & Time]';
+    var h = +m[4], h12 = h % 12 || 12;
+    return MONTHS[+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1] + ' \u2014 ' + h12 + ':' + m[5] + ' ' + (h < 12 ? 'AM' : 'PM') +
+      (CONFIG.SHARED.tzLabel ? ' ' + CONFIG.SHARED.tzLabel : '');
+  }
+  function compose() {
+    var S = CONFIG.SHARED, flag = CONFIG.FLAGS[answers.flag];
+    var picked = answers.conditions || [];
+    var chosen = flag.hazards ? hazardPool().filter(function (h) { return h.flag === answers.flag && picked.indexOf(h.id) > -1; }) : [];
+    var blocks = chosen.map(function (h) { return { name: h.display, body: h.body == null ? '[Copy to be added: ' + h.label + ']' : h.body }; });
+    if (!flag.hazards) blocks.push({ name: flag.webHazard, body: flag.body });
+    var pending = chosen.filter(function (h) { return h.body == null; }).map(function (h) { return h.label; });
+
+    var caption = [{ text: flag.captionHeader, strong: true }, { text: fill(flag.statusLine) }];
+    if (flag.hazards) blocks.forEach(function (b) { caption.push({ text: 'Current Hazard: ' + b.name + '\n' + b.body }); });
+    else caption.push({ text: flag.body });
+    if (flag.unsupervised) caption.push({ text: fill(S.unsupervised) });
+    caption.push({ text: S.tagline });
+
+    var web = { cls: flag.webClass, status: flag.status, hazards: blocks, updated: formatUpdated(updated) };
+
+    var graphics = {};                                     // flag default, then any condition-specific override per size
+    Object.keys(flag.graphics || {}).forEach(function (k) { graphics[k] = flag.graphics[k]; });
+    chosen.forEach(function (h) { Object.keys(h.graphics || {}).forEach(function (k) { graphics[k] = h.graphics[k]; }); });
+    return { flag: flag, chosen: chosen, caption: caption, web: web,
+      graphics: graphics,
+      blocked: pending.length ? 'Copy has not been written yet for: ' + pending.join(', ') + '.' : '' };
+  }
+  function captionText(o) { return o.caption.map(function (p) { return p.text; }).join('\n\n'); }
+  function webHtml(o) {                 // the full block for the Elementor HTML widget
+    var W = CONFIG.WEB, w = o.web, L = W.labels;
+    var rows = w.hazards.map(function (b) {
+      return '  <div class="ws-row">\n' +
+             '    <span class="ws-label">' + esc(L.hazard) + '</span>\n' +
+             '    <span class="ws-value">' + esc(b.name) + ': ' + esc(b.body) + '</span>\n' +
+             '  </div>\n';
+    }).join('\n');
+    return W.header + '\n\n' +
+      '<div class="ws-panel ' + w.cls + '">\n\n' +
+      '  <div class="ws-row ws-row--status">\n' +
+      '    <span class="ws-label">' + esc(L.status) + '</span>\n' +
+      '    <span class="ws-status">\n' +
+      '      <span class="ws-dot"></span>\n' +
+      '      <span class="ws-status-text">' + esc(w.status) + '</span>\n' +
+      '    </span>\n' +
+      '  </div>\n\n' +
+      rows + '\n' +
+      '  <div class="ws-row">\n' +
+      '    <span class="ws-label">' + esc(L.updated) + '</span>\n' +
+      '    <span class="ws-value ws-value--muted">' + esc(w.updated) + '</span>\n' +
+      '  </div>\n\n' +
+      '</div>\n\n' +
+      '<style>\n' + W.css + '\n</style>\n';
+  }
+
+  /* ---------------- step UI (built once, then shown/hidden) ---------------- */
+  var FOLD_DELAY = 1500;        // ms after the last tick before the condition list folds away
+  var stepEls = {};
+  function buildSteps() {
+    var host = $('steps'); host.replaceChildren();
+    CONFIG.STEPS.forEach(function (s) {
+      var num = el('span', { class: 'num' });
+      var sum = el('span', { class: 'sum' });
+      var chg = el('button', { type: 'button', class: 'btn ghost chg', 'aria-label': 'Change answer: ' + s.prompt }, 'Change');
+      var head = el('div', { class: 'q' }, [num, el('h2', {}, s.prompt), sum, chg]);
+      var body = el('div', { class: 'body' });
+      var card = el('section', { class: 'card', 'data-step': s.id, hidden: '' }, [head, body]);
+      if (s.help) body.append(el('p', { class: 'help' }, s.help));
+      head.addEventListener('click', function () {        // reopen a folded question
+        if (!card.classList.contains('collapsed')) return;
+        collapsed[s.id] = false; clearTimeout(timers[s.id]); render();
+        var first = card.querySelector('[aria-pressed="true"], input, .flag-btn'); if (first) first.focus();
+      });
+
+      if (s.type === 'single') {
+        var grid = el('div', { class: 'flags', role: 'group', 'aria-label': s.prompt });
+        s.options.forEach(function (key) {
+          var f = CONFIG.FLAGS[key];
+          var b = el('button', { type: 'button', class: 'flag-btn', 'data-opt': key, 'aria-pressed': 'false', style: '--c:' + f.color },
+            [el('span', { class: 'sw' }), f.label, el('small', {}, f.sub)]);
+          b.addEventListener('click', function () {
+            if (answers[s.id] !== key) { answers[s.id] = key; resetAfter(s.id); }
+            collapsed[s.id] = true; render();
+          });
+          grid.append(b);
+        });
+        body.append(grid);
+      }
+      if (s.type === 'multi') {
+        var opts = el('div', { class: 'opts', role: 'group', 'aria-label': s.prompt });
+        var pool = s.optionsFrom === 'HAZARDS' ? hazardPool() : [];
+        var showIfFlag = s.showIf && s.showIf.flag;
+        pool.filter(function (h) { return !showIfFlag || h.flag === showIfFlag; }).forEach(function (h) {
+          var cb = el('input', { type: 'checkbox', id: 'opt-' + s.id + '-' + h.id, 'data-opt': h.id });
+          cb.addEventListener('change', function () {
+            var cur = answers[s.id] || [];
+            answers[s.id] = cb.checked ? cur.concat(h.id) : cur.filter(function (x) { return x !== h.id; });
+            collapsed[s.id] = false; clearTimeout(timers[s.id]);
+            if (answers[s.id].length) timers[s.id] = setTimeout(function () { collapsed[s.id] = true; render(); }, FOLD_DELAY);
+            render();
+          });
+          var row = el('label', { class: 'opt', for: cb.id }, [cb, el('span', { class: 'n' }, h.label)]);
+          if (h.body == null) row.append(el('span', { class: 'tag' }, 'No copy yet'));
+          opts.append(row);
+        });
+        body.append(opts);
+      }
+      host.append(card);
+      stepEls[s.id] = { card: card, num: num, sum: sum };
+    });
+  }
+
+  function summaryText(s) {
+    var a = answers[s.id];
+    if (s.type === 'single') return a ? CONFIG.FLAGS[a].label + ' flag' : '';
+    var pool = s.optionsFrom === 'HAZARDS' ? hazardPool() : [];
+    return pool.filter(function (h) { return (a || []).indexOf(h.id) > -1; }).map(function (h) { return h.label; }).join(', ');
+  }
+
+  /* ---------------- render ---------------- */
+  function render() {
+    var vis = visibleSteps(), visIds = vis.map(function (s) { return s.id; });
+
+    CONFIG.STEPS.forEach(function (s) {
+      var e = stepEls[s.id], on = visIds.indexOf(s.id) > -1;
+      e.card.hidden = !on;
+      if (!on) { shown[s.id] = false; return; }
+      e.num.textContent = String(visIds.indexOf(s.id) + 1);
+      e.card.classList.toggle('done', !!complete(s));
+      e.card.classList.toggle('collapsed', !!collapsed[s.id] && !!complete(s));
+      e.sum.textContent = summaryText(s);
+      if (!shown[s.id]) { shown[s.id] = true; e.card.classList.remove('enter'); void e.card.offsetWidth; e.card.classList.add('enter'); }
+
+      if (s.type === 'single') {
+        e.card.querySelectorAll('.flag-btn').forEach(function (b) { b.setAttribute('aria-pressed', String(answers[s.id] === b.dataset.opt)); });
+      }
+      if (s.type === 'multi') {
+        var cur = answers[s.id] || [];
+        e.card.querySelectorAll('input[type=checkbox]').forEach(function (cb) { cb.checked = cur.indexOf(cb.dataset.opt) > -1; });
+      }
+    });
+
+    var finished = allComplete();
+    var wasHidden = $('result').hidden;
+    $('result').hidden = !finished;
+    if (finished) {
+      if (wasHidden) { $('result').classList.remove('enter'); void $('result').offsetWidth; $('result').classList.add('enter'); }
+      renderResult();
+    }
+  }
+
+  function renderResult() {
+    out = compose();
+    var f = out.flag;
+    var sum = $('summary'); sum.replaceChildren();
+    sum.append(el('span', { class: 'pill', style: '--c:' + f.color + ';--ink-c:' + f.ink }, f.status + ' FLAG'));
+    var names = f.hazards ? out.chosen.map(function (h) { return h.display; }) : [f.webHazard];
+    sum.append(el('span', {}, names.join(' + ')));
+    $('notice').hidden = !out.blocked; $('notice').className = 'notice'; $('notice').textContent = out.blocked;
+
+    var cb = $('captionBox'); cb.replaceChildren();
+    out.caption.forEach(function (p) { cb.append(el('p', p.strong ? { class: 'strong' } : {}, marked(p.text))); });
+    $('captionMeta').textContent = Array.from(captionText(out)).length.toLocaleString() + ' characters · Instagram allows 2,200';
+
+    var code = webHtml(out);
+    $('webCode').textContent = code;
+    var host = $('webPrev');
+    var root = host.shadowRoot || host.attachShadow({ mode: 'open' });   // isolates the panel's CSS from this page
+    root.innerHTML = code;
+    ['copyCaption', 'copyWebHtml'].forEach(function (id) { $(id).disabled = !!out.blocked; $(id).title = out.blocked; });
+    renderGraphics();
+  }
+
+  /* ---------------- graphics ---------------- */
+  function renderGraphics() {
+    var g = $('gfx'), f = out.flag;
+    g.replaceChildren();
+    g.className = 'gfx n' + CONFIG.FORMATS.length;
+    CONFIG.FORMATS.forEach(function (d) {
+      var name = out.graphics[d.id];
+      var fig = el('figure', {});
+      var slot = el('div', { class: 'ph', style: '--ar:' + (d.ratio || '3 / 2') }, name ? 'Loading graphic…' : 'No ' + d.label + ' graphic is set for this flag in config.js.');
+      var save = el('button', { type: 'button', class: 'btn ghost' }, 'Save PNG'); save.disabled = true;
+      fig.append(slot, el('figcaption', {}, [d.label, save]));
+      g.append(fig);
+      if (!name) return;
+      loadGraphic(name, function (err, data) {
+        if (err) { slot.textContent = 'Graphic unavailable: ' + err; return; }
+        var img = el('img', { src: data.url, alt: f.label + ' flag graphic, ' + d.label });
+        slot.replaceWith(img);
+        save.disabled = false;
+        save.addEventListener('click', function () { downloadGraphic(name, data); });
+      });
+    });
+    balanceGraphics();
+  }
+
+  /* Two-column graphics layout: the tall Instagram image on the left, website + Facebook stacked on the right.
+     The right column's width is worked out from the real image proportions (CONFIG.FORMATS) so that both
+     columns end on exactly the same line, at any window width. On phones everything stacks and this is skipped. */
+  function ratioH(fmt) {                                   // height per unit of width, from 'w / h'
+    var p = String(fmt.ratio || '3 / 2').split('/'); return parseFloat(p[1]) / parseFloat(p[0]);
+  }
+  function balanceGraphics() {
+    if (!CONFIG) return;
+    var g = $("gfx"), figs = g.children;
+    var narrow = window.matchMedia('(max-width: 700px)').matches;
+    if (narrow || figs.length !== 3 || CONFIG.FORMATS.length !== 3 || !g.clientWidth) { g.style.gridTemplateColumns = ''; return; }
+    var cs = getComputedStyle(g), colGap = parseFloat(cs.columnGap) || 0, rowGap = parseFloat(cs.rowGap) || 0;
+    var inner = parseFloat(getComputedStyle(figs[0]).rowGap) || 0;      // gap between picture and caption
+    var cap = figs[0].querySelector('figcaption').offsetHeight;           // caption row height
+    var hL = ratioH(CONFIG.FORMATS[0]), hR = ratioH(CONFIG.FORMATS[1]) + ratioH(CONFIG.FORMATS[2]);
+    var W = g.clientWidth, B = 2;                                         // B = the picture's 1px border on each side
+    // left height  = hL*(wL-B) + B + inner + cap
+    // right height = hR*(wR-B) + 2B + 2*(inner+cap) + rowGap        with wL + wR = W - colGap
+    var wR = (hL * (W - colGap) - B * hL + B * hR - B - inner - cap - rowGap) / (hL + hR);
+    var wL = W - colGap - wR;
+    var val = wL.toFixed(2) + 'px ' + wR.toFixed(2) + 'px';
+    if (g.style.gridTemplateColumns !== val) g.style.gridTemplateColumns = val;
+  }
+  if (window.ResizeObserver) new ResizeObserver(function () { balanceGraphics(); }).observe($('gfx'));
+  window.addEventListener('resize', balanceGraphics);
+  function loadGraphic(name, cb) {          // the PNGs live in the flags folder next to this page
+    var url = (CONFIG.GRAPHICS_BASE || 'flags/') + encodeURIComponent(name);
+    var probe = new Image();
+    probe.onload = function () { cb(null, { url: url }); };
+    probe.onerror = function () { cb('"' + name + '" was not found in the flags folder'); };
+    probe.src = url;
+  }
+  function downloadGraphic(name, data) {
+    try {
+      var a = document.createElement('a');
+      a.href = data.url; a.download = CONFIG.SHARED.lakeSlug + '-' + name;
+      document.body.appendChild(a); a.click(); a.remove();
+      toast('Graphic saved');
+    } catch (e) { toast('Could not save. Right-click the image and choose Save image as.'); }
+  }
+
+  /* ---------------- copy buttons ---------------- */
+  var tt;
+  function toast(msg) { var t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove('show'); }, 2400); }
+  function legacyCopy(text) {
+    var ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0'; document.body.appendChild(ta); ta.select();
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+    ta.remove(); return ok;
+  }
+  function copyText(text, msg) {
+    var fallback = function () { toast(legacyCopy(text) ? msg : 'Copy blocked by the browser. Select the text and press Ctrl/Cmd+C.'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { toast(msg); }, fallback);
+    else fallback();
+  }
+  function wire() {
+    $('copyCaption').addEventListener('click', function () { copyText(captionText(out), 'Caption copied'); });
+    $('copyWebHtml').addEventListener('click', function () { copyText(webHtml(out), 'Website HTML copied'); });
+    $('updated').addEventListener('input', function (e) { updated = e.target.value; if (!$('result').hidden) renderResult(); });
+    $('nowBtn').addEventListener('click', function () { setNow(); renderResult(); });
+    $('restart').addEventListener('click', function () {
+      Object.keys(timers).forEach(function (k) { clearTimeout(timers[k]); });
+      answers = { conditions: [] }; shown = {}; collapsed = {}; timers = {};
+      setNow(); render(); window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+  function setNow() {
+    var d = new Date(), p = function (n) { return String(n).padStart(2, '0'); };
+    updated = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes());
+    $('updated').value = updated;
+  }
+
+  /* ---------------- boot ---------------- */
+  var cfg = window.FLAG_CONFIG;
+  if (!cfg) {
+    $('loading').className = 'notice err';
+    $('loading').textContent = 'Could not load the settings: config.js did not load. It must sit in the same folder as this page.';
+  } else {
+    CONFIG = cfg;
+    $('loading').hidden = true;
+    $('eyebrow').textContent = cfg.SHARED.lake + ' · Seasonal Lake Flag System';
+    answers = { conditions: [] };
+    buildSteps(); wire(); setNow(); render();
+  }
+})();
+</script>
+</body>
+</html>
