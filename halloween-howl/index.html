@@ -20,7 +20,7 @@
     .card { background:var(--purple); color:var(--on); border:2px solid var(--purple-line); border-radius:12px; padding:18px; margin-bottom:16px; box-shadow:0 3px 10px rgba(73,31,108,.25); }
     h2 { font-size:1.05rem; margin:0 0 12px; color:var(--orange-light); text-transform:uppercase; letter-spacing:1px; font-family:'Roboto',sans-serif; font-weight:700; }
     label.f { display:block; font-family:'Roboto',sans-serif; font-size:.85rem; color:var(--onmuted); margin:10px 0 4px; }
-    input[type=text], input[type=email], select { width:100%; padding:12px; font-size:1rem; font-family:'Roboto',sans-serif; border-radius:8px; border:2px solid transparent; background:#ffffff; color:var(--ink); }
+    input[type=text], input[type=email], input[type=number], select { width:100%; padding:12px; font-size:1rem; font-family:'Roboto',sans-serif; border-radius:8px; border:2px solid transparent; background:#ffffff; color:var(--ink); }
     input:focus { outline:3px solid var(--orange-light); }
     .hint { font-family:'Roboto',sans-serif; font-size:.8rem; color:var(--onmuted); margin-top:6px; }
     .guest-row { display:flex; gap:8px; margin-bottom:8px; }
@@ -84,17 +84,23 @@
       <input type="text" id="lastName" autocomplete="family-name" maxlength="60">
       <label class="f" for="email">Email (for your confirmation)</label>
       <input type="email" id="email" autocomplete="email">
-      <div id="attendeesRow">
-        <label class="f" for="attendees">How many people are coming in your group, including you?</label>
-        <select id="attendees"></select>
-        <div class="hint">Count everyone coming with you: your spouse or partner, children, and any friends or family who don't live with you. You'll be asked for a first name for each person below.</div>
-      </div>
+      <label class="f" for="household">How many people from your household are attending, including you?</label>
+      <input type="number" id="household" min="1" max="30" value="1" inputmode="numeric">
+      <div class="hint">Your spouse or partner, your children, and anyone else who lives with you. You'll be asked for a first name for each person below.</div>
+    </div>
+    </div>
+
+    <div class="card hidden" id="memberCard">
+      <h2>People in your household</h2>
+      <div class="hint" style="margin:0 0 10px">First names only.</div>
+      <div id="members"></div>
     </div>
 
     <div class="card" id="guestCard">
-      <h2>Guests</h2>
+      <h2>Friends &amp; family from outside your household</h2>
       <div class="hint" id="guestHint" style="margin:0 0 10px"></div>
       <div id="guests"></div>
+      <button type="button" class="btn-small" id="addGuest">+ Add a guest</button>
     </div>
 
     <div class="card">
@@ -172,10 +178,8 @@
     }
     $('loading').classList.add('hidden');
     if (!S.registrationOpen) { $('closedView').textContent = S.closedMessage; $('closedView').classList.remove('hidden'); return; }
-    const sel = $('attendees'); sel.innerHTML = '';
-    for (let n = 1; n <= S.maxGuests + 1; n++) sel.add(new Option(String(n), String(n)));
-    $('attendeesRow').classList.toggle('hidden', S.maxGuests < 1);
-    $('guestHint').textContent = 'First names only. Please include everyone in your group: your spouse or partner, your children, and any friends or family joining you.';
+    $('guestHint').textContent = 'Optional. First names only. Up to ' + S.maxGuests + ' guest' + (S.maxGuests === 1 ? '' : 's') + ' from outside your household.';
+    $('guestCard').classList.toggle('hidden', S.maxGuests < 1);
     $('formView').classList.remove('hidden');
     renderAll();
   }
@@ -186,26 +190,44 @@
   }
 
   // ---- form logic
-  function attendeeCount() { return Math.max(1, parseInt($('attendees').value, 10) || 1); }
+  function householdCount() { var n = parseInt($('household').value, 10); if (!(n >= 1)) n = 1; return Math.min(30, n); }
+  function memberCount() { return document.querySelectorAll('#members input').length; }
   function guestCount() { return document.querySelectorAll('#guests input').length; }
-  function partySize() { return (attendeeCount() - 1) + (S.registrantCounts ? 1 : 0); }
+  function partySize() {
+    const named = [...document.querySelectorAll('#guests input')].filter(i => i.value.trim()).length;
+    return (householdCount() - 1) + named + (S.registrantCounts ? 1 : 0);
+  }
 
-  // One name box per extra person, driven by the "how many are attending" dropdown.
-  function syncGuests() {
-    const want = attendeeCount() - 1, box = $('guests');
-    while (guestCount() > want) box.lastElementChild.remove();
-    while (guestCount() < want) {
+  // One name box per extra household member, driven by the household count.
+  function syncMembers() {
+    const want = householdCount() - 1, box = $('members');
+    while (memberCount() > want) box.lastElementChild.remove();
+    while (memberCount() < want) {
       const row = document.createElement('div');
       row.className = 'guest-row';
       row.innerHTML = '<input type="text" maxlength="60" autocomplete="off">';
-      row.querySelector('input').placeholder = 'Guest ' + (guestCount() + 1) + ' first name';
+      row.querySelector('input').placeholder = 'Household member ' + (memberCount() + 2) + ' first name';
       box.appendChild(row);
     }
-    $('guestCard').classList.toggle('hidden', want < 1);
+    $('memberCard').classList.toggle('hidden', want < 1);
+  }
+
+  function addGuest() {
+    if (guestCount() >= S.maxGuests) return;
+    const row = document.createElement('div');
+    row.className = 'guest-row';
+    row.innerHTML = '<input type="text" placeholder="Guest first name" maxlength="60" autocomplete="off">' +
+                    '<button type="button" class="btn-x" aria-label="Remove guest">\u2715</button>';
+    row.querySelector('input').addEventListener('input', renderAll);
+    row.querySelector('button').addEventListener('click', () => { row.remove(); renderAll(); });
+    $('guests').appendChild(row);
+    renderAll();
+    row.querySelector('input').focus();
   }
 
   function renderAll() {
-    syncGuests();
+    syncMembers();
+    $('addGuest').classList.toggle('hidden', guestCount() >= S.maxGuests);
     const p = partySize();
     $('party').innerHTML = 'Your party: <b>' + p + '</b> ' + (p === 1 ? 'person' : 'people');
     renderShows();
@@ -260,11 +282,12 @@
 
   $('submit').addEventListener('click', () => {
     showError('');
-    if ([...document.querySelectorAll('#guests input')].some(i => !i.value.trim())) { showError('Please enter a first name for each guest.'); return; }
+    if ([...document.querySelectorAll('#members input')].some(i => !i.value.trim())) { showError('Please enter a first name for each person in your household.'); return; }
     const payload = {
       name: $('name').value,
       lastName: $('lastName').value,
-      attendees: attendeeCount(),
+      household: householdCount(),
+      householdMembers: [...document.querySelectorAll('#members input')].map(i => i.value),
       email: $('email').value,
       guests: [...document.querySelectorAll('#guests input')].map(i => i.value).filter(v => v.trim()),
       showIds: [...selected],
@@ -303,12 +326,14 @@
   $('again').addEventListener('click', () => {
     $('doneView').classList.add('hidden');
     $('formView').classList.remove('hidden');
-    $('name').value = ''; $('lastName').value = ''; $('email').value = ''; $('guests').innerHTML = ''; $('attendees').value = '1';
+    $('name').value = ''; $('lastName').value = ''; $('email').value = ''; $('guests').innerHTML = ''; $('members').innerHTML = ''; $('household').value = '1';
     $('release').checked = false; $('portfolio').checked = false;   // each household agrees for itself
     selected.clear(); refreshShows(); renderAll();
   });
 
-  $('attendees').addEventListener('change', renderAll);
+  $('household').addEventListener('input', renderAll);
+  $('household').addEventListener('change', () => { $('household').value = householdCount(); renderAll(); });
+  $('addGuest').addEventListener('click', addGuest);
 
   // ---- start
   if (!API || API.indexOf('PASTE_') === 0) {
