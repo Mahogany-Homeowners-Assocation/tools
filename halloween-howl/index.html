@@ -58,6 +58,9 @@
     .agree { display:flex; gap:10px; align-items:flex-start; font-family:'Roboto',sans-serif; cursor:pointer; margin-top:8px; background:var(--purple-dark); border:2px solid var(--purple-line); border-radius:10px; padding:12px; }
     .agree input { width:20px; height:20px; accent-color:var(--orange); flex:none; margin-top:2px; }
     #submitHint { text-align:center; font-family:'Roboto',sans-serif; font-size:.85rem; color:#4c4364; margin-top:8px; }
+    .name-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .name-row > div { min-width:0; }
+    @media (max-width:420px) { .name-row { grid-template-columns:1fr; gap:0; } }
     .hidden { display:none; }
   </style>
 </head>
@@ -78,10 +81,16 @@
 
     <div class="card">
       <h2>Who's registering?</h2>
-      <label class="f" for="name">Your first name</label>
-      <input type="text" id="name" autocomplete="given-name" maxlength="60">
-      <label class="f" for="lastName">Your last name</label>
-      <input type="text" id="lastName" autocomplete="family-name" maxlength="60">
+      <div class="name-row">
+        <div>
+          <label class="f" for="name">Your first name</label>
+          <input type="text" id="name" autocomplete="given-name" maxlength="60">
+        </div>
+        <div>
+          <label class="f" for="lastName">Your last name</label>
+          <input type="text" id="lastName" autocomplete="family-name" maxlength="60">
+        </div>
+      </div>
       <label class="f" for="email">Email (for your confirmation)</label>
       <input type="email" id="email" autocomplete="email">
       <label class="f" for="household">How many people from your household are attending, including you?</label>
