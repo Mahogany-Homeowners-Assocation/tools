@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Facility Tour | Mahogany Beach Club</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f4f4;--text:#37302c;--muted:#807a75;--accent:#2183b4;--green:#16a34a;--red:#e53e3e;--radius:12px}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+header{background:#fff;border-top:5px solid var(--accent);padding:1.75rem 1rem 1.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+header h1{margin:0;font-size:1.9rem;font-weight:800;letter-spacing:-1px}
+header p{margin:.4rem auto 0;color:var(--muted);max-width:560px;font-size:.95rem;line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.75rem}
+.chip{border:2px solid #e2e8f0;background:#fff;color:var(--muted);font:600 .85rem 'Inter',sans-serif;padding:.5rem 1rem;border-radius:9999px;cursor:pointer}
+.chip.active{border-color:var(--accent);color:var(--accent);background:rgba(33,131,180,.08)}
+.day{font-size:.9rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:2rem 0 .9rem;display:flex;align-items:center;gap:1rem}
+.day::after{content:'';height:1px;background:#e2e8f0;flex:1}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem}
+.slot{background:#fff;border:2px solid #e2e8f0;border-radius:var(--radius);padding:.9rem 1rem;text-align:left;cursor:pointer;font-family:inherit;transition:.15s}
+.slot:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,.06)}
+.slot .t{font-weight:800;font-size:1.05rem;color:var(--text)}
+.slot .f{font-size:.8rem;font-weight:600;color:var(--accent);margin-top:.15rem}
+.card{background:#fff;border-radius:var(--radius);padding:1.75rem;box-shadow:0 4px 12px rgba(0,0,0,.04);border:1px solid #f1f5f9}
+.empty{text-align:center;color:var(--muted);font-weight:600;padding:3rem 1rem;line-height:1.6}
+.summary{background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid var(--accent);border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1.25rem}
+.summary b{display:block;font-size:1.05rem}
+.summary span{color:var(--muted);font-size:.9rem}
+label{display:block;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:1rem 0 .35rem}
+input,textarea{width:100%;border:2px solid #e2e8f0;border-radius:8px;padding:.7rem .9rem;font:500 1rem 'Inter',sans-serif;color:var(--text);background:#fff}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(33,131,180,.15)}
+.hint{font-size:.8rem;color:var(--muted);margin-top:.3rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.btn{border:none;border-radius:8px;padding:.85rem 1.5rem;font:700 .95rem 'Inter',sans-serif;cursor:pointer;transition:.15s}
+.btn:disabled{opacity:.6;cursor:wait}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-ghost{background:#fff;color:var(--text);border:1px solid #cbd5e0}
+.btn-danger{background:#fff;color:var(--red);border:2px solid var(--red)}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem}
+.msg{border-radius:8px;padding:1rem 1.1rem;font-size:.92rem;line-height:1.5;margin-bottom:1.25rem}
+.msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.msg.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.msg.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:.3rem .8rem;border-radius:9999px;margin-bottom:1rem}
+.pill.Pending{background:#ffedd5;color:#9a3412}.pill.Confirmed{background:#dcfce7;color:#166534}
+.pill.Declined{background:#fee2e2;color:#991b1b}.pill.Cancelled{background:#e2e8f0;color:#475569}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+h2{margin:0 0 1rem;font-size:1.3rem;font-weight:800}
+@media(max-width:560px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Book a Facility Tour</h1>
+  <p id="sub">Pick a time that suits you and we'll show you around. Our bookings team confirms every request by email.</p>
+</header>
+<main id="app"><div class="empty">Loading available times...</div></main>
+
+<script>
+/* >>> After deploying the PUBLIC Apps Script web app, paste its URL here <<< */
+var API_URL = 'https://script.google.com/macros/s/AKfycbzJVaehWqWOV_ncv9tz5AkUw9LyfAyxDzT8PDpBNKrdWjCp1dWyL43HjChrcexVB_-JhA/exec';
+
+var app = document.getElementById('app');
+var params = new URLSearchParams(location.search);
+var TOKEN = params.get('t');
+var state = { data: null, fac: 'All', slot: null, booking: null, mode: TOKEN ? 'manage' : 'book' };
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});}
+function pd(ds){var p=ds.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function fDay(ds){return pd(ds).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}
+function fLong(ds){return pd(ds).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
+function fTime(t){var p=t.split(':'),h=+p[0];return ((h%12)||12)+':'+p[1]+' '+(h>=12?'PM':'AM');}
+function range(o){return fTime(o.start)+' – '+fTime(o.end);}
+
+function get(qs){
+  return fetch(API_URL+'?'+qs).then(function(r){return r.json();});
+}
+function post(body){
+  return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json();});
+}
+function fail(msg){app.innerHTML='<div class="card"><div class="msg err">'+esc(msg)+'</div><div class="actions"><button class="btn btn-ghost" onclick="start()">Back</button></div></div>';}
+
+function start(){
+  state.slot=null;
+  if(API_URL.indexOf('PASTE_')===0){app.innerHTML='<div class="empty">This page is not connected yet. Set API_URL in index.html.</div>';return;}
+  if(state.mode==='manage'){
+    get('action=booking&token='+encodeURIComponent(TOKEN)).then(function(r){
+      if(!r.ok)throw new Error(r.error);
+      state.booking=r.booking;state.phone=r.phone;
+      return get('action=slots');
+    }).then(function(s){state.data=s;renderManage();}).catch(function(e){app.innerHTML='<div class="card"><div class="msg err">'+esc(e.message||e)+'</div></div>';});
+  }else{
+    get('action=slots').then(function(s){if(!s.ok)throw new Error(s.error);state.data=s;renderBook();})
+      .catch(function(e){app.innerHTML='<div class="empty">We could not load tour times right now. Please try again shortly.</div>';});
+  }
+}
+
+/* ---- slot picker (shared by booking + reschedule) ---- */
+function pickerHtml(onclickFn){
+  var d=state.data;
+  var chips='<div class="chips"><button class="chip'+(state.fac==='All'?' active':'')+'" onclick="setFac(\'All\')">All</button>'+
+    d.facilities.map(function(f){return '<button class="chip'+(state.fac===f.name?' active':'')+'" data-f="'+esc(f.name)+'" onclick="setFac(this.dataset.f)">'+esc(f.name)+'</button>'}).join('')+'</div>';
+  var slots=d.slots.filter(function(s){return state.fac==='All'||s.facility===state.fac;});
+  if(state.mode==='manage'&&state.booking)slots=slots.filter(function(s){return s.id!==state.booking.slotId;});
+  if(!slots.length)return chips+'<div class="empty">No tour times are open in the next '+d.maxDaysAhead+' days'+(state.fac!=='All'?' for '+esc(state.fac):'')+'.<br>Please check back soon or call us at '+esc(d.phone)+'.</div>';
+  var byDay={},order=[];
+  slots.forEach(function(s){if(!byDay[s.date]){byDay[s.date]=[];order.push(s.date);}byDay[s.date].push(s);});
+  return chips+order.map(function(dt){
+    return '<div class="day">'+esc(fDay(dt))+'</div><div class="slots">'+byDay[dt].map(function(s){
+      return '<button class="slot" onclick="'+onclickFn+'(\''+esc(s.id)+'\')"><div class="t">'+esc(range(s))+'</div><div class="f">'+esc(s.facility)+'</div></button>';
+    }).join('')+'</div>';
+  }).join('');
+}
+function setFac(f){state.fac=f;state.mode==='manage'?renderReschedulePicker():renderBook();}
+function slotById(id){return state.data.slots.filter(function(s){return s.id===id})[0];}
+
+/* ---- new booking ---- */
+function renderBook(){
+  document.getElementById('title').textContent='Book a Facility Tour';
+  app.innerHTML=pickerHtml('chooseSlot');
+}
+function chooseSlot(id){
+  var s=slotById(id);state.slot=s;window.scrollTo(0,0);
+  app.innerHTML='<div class="card"><h2>Your details</h2>'+
+    '<div class="summary"><b>'+esc(s.facility)+'</b><span>'+esc(fLong(s.date))+' · '+esc(range(s))+'</span></div>'+
+    '<form id="bf" novalidate>'+
+    '<label for="name">Full name</label><input id="name" autocomplete="name" required>'+
+    '<div class="row"><div><label for="email">Email</label><input id="email" type="email" autocomplete="email" required></div>'+
+    '<div><label for="phone">Phone</label><input id="phone" type="tel" autocomplete="tel" required></div></div>'+
+    '<label for="guests">How many people will join you? (not counting yourself)</label><input id="guests" type="number" min="0" max="500" value="0" required>'+
+    '<div class="hint">Enter 0 if you are coming alone. This helps us plan the tour.</div>'+
+    '<label for="notes">Anything we should know? (optional)</label><textarea id="notes" rows="3" placeholder="e.g. type of event you are planning, accessibility needs"></textarea>'+
+    '<input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">'+
+    '<div id="err"></div>'+
+    '<div class="actions"><button type="submit" class="btn btn-primary" id="sbtn">Request this tour</button><button type="button" class="btn btn-ghost" onclick="renderBook()">Back</button></div></form></div>';
+  document.getElementById('bf').addEventListener('submit',submitBooking);
+}
+function submitBooking(e){
+  e.preventDefault();
+  var btn=document.getElementById('sbtn'),err=document.getElementById('err');
+  btn.disabled=true;btn.textContent='Sending...';err.innerHTML='';
+  post({action:'book',slotId:state.slot.id,name:val('name'),email:val('email'),phone:val('phone'),guests:val('guests'),notes:val('notes'),website:val('website')})
+  .then(function(r){
+    if(!r.ok)throw new Error(r.error);
+    var b=r.booking;window.scrollTo(0,0);
+    app.innerHTML='<div class="card"><h2>Request received</h2><div class="msg warn"><b>Not confirmed yet.</b> Our bookings team will review your request and email you at <b>'+esc(b.email)+'</b> once your tour is confirmed.</div>'+
+      '<div class="summary"><b>'+esc(b.facility)+'</b><span>'+esc(fLong(b.date))+' · '+esc(range(b))+'</span></div>'+
+      '<p style="color:var(--muted);font-size:.9rem;line-height:1.5">Your time is being held for you. The email includes a link to reschedule or cancel whenever you need.</p>'+
+      '<div class="actions"><button class="btn btn-ghost" onclick="start()">Book another tour</button></div></div>';
+  }).catch(function(ex){
+    err.innerHTML='<div class="msg err">'+esc(ex.message||'Something went wrong. Please try again.')+'</div>';
+    btn.disabled=false;btn.textContent='Request this tour';
+  });
+}
+function val(id){return document.getElementById(id).value;}
+
+/* ---- manage / reschedule / cancel ---- */
+function renderManage(){
+  var b=state.booking;
+  document.getElementById('title').textContent='Manage Your Tour';
+  document.getElementById('sub').textContent='Reschedule or cancel as often as you need.';
+  var note='';
+  if(b.status==='Pending')note='<div class="msg warn">Your request is awaiting confirmation from our team.</div>';
+  if(b.status==='Confirmed')note='<div class="msg ok">Your tour is confirmed.</div>';
+  if(b.status==='Declined')note='<div class="msg err">This request could not be confirmed.'+(b.declineReason?' Note from our team: '+esc(b.declineReason):'')+'</div>';
+  var acts=b.canModify?'<div class="actions"><button class="btn btn-primary" onclick="renderReschedulePicker()">Reschedule</button><button class="btn btn-danger" onclick="doCancel(this)">Cancel tour</button></div>'
+    :'<div class="actions"><button class="btn btn-primary" onclick="location.href=location.pathname">Book a new tour</button></div>';
+  app.innerHTML='<div class="card"><span class="pill '+esc(b.status)+'">'+esc(b.status)+'</span>'+note+
+    '<div class="summary"><b>'+esc(b.facility)+'</b><span>'+esc(fLong(b.date))+' · '+esc(range(b))+'</span></div>'+
+    '<div style="font-size:.92rem;color:var(--muted);line-height:1.6">'+esc(b.name)+' · '+esc(b.email)+'</div>'+acts+'</div>';
+}
+function renderReschedulePicker(){
+  document.getElementById('title').textContent='Choose a New Time';
+  app.innerHTML='<div class="actions" style="margin:0 0 1.25rem"><button class="btn btn-ghost" onclick="renderManage()">← Back</button></div>'+
+    '<div class="msg warn">Your new time will need to be re-confirmed by our team.</div>'+pickerHtml('confirmReschedule');
+}
+function confirmReschedule(id){
+  var s=slotById(id);
+  if(!confirm('Move your tour to '+fLong(s.date)+', '+range(s)+' ('+s.facility+')?'))return;
+  app.innerHTML='<div class="empty">Updating...</div>';
+  post({action:'reschedule',token:TOKEN,slotId:id}).then(function(r){
+    if(!r.ok)throw new Error(r.error);
+    state.booking=r.booking;window.scrollTo(0,0);renderManage();
+    app.insertAdjacentHTML('afterbegin','<div class="msg ok">Request sent. We will email you once the new time is confirmed.</div>');
+  }).catch(function(e){alert(e.message||e);start();});
+}
+function doCancel(btn){
+  if(!confirm('Cancel this tour?'))return;
+  btn.disabled=true;btn.textContent='Cancelling...';
+  post({action:'cancel',token:TOKEN}).then(function(r){
+    if(!r.ok)throw new Error(r.error);
+    state.booking=r.booking;renderManage();
+  }).catch(function(e){alert(e.message||e);btn.disabled=false;btn.textContent='Cancel tour';});
+}
+
+start();
+</script>
+</body>
+</html>
