@@ -3,199 +3,469 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Book a Facility Tour | Mahogany Beach Club</title>
+<title>Request a Facility Tour | Mahogany Beach Club</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f4f4f4;--text:#37302c;--muted:#807a75;--accent:#2183b4;--green:#16a34a;--red:#e53e3e;--radius:12px}
+:root{--bg:#f4f4f4;--card:#fff;--text:#37302c;--muted:#807a75;--line:#e2e8f0;--accent:#2183b4;--accent-soft:rgba(33,131,180,.08);--green:#16a34a;--red:#e53e3e;--amber:#b45309;--radius:14px}
 *{box-sizing:border-box}
-body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-header{background:#fff;border-top:5px solid var(--accent);padding:1.75rem 1rem 1.5rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
-header h1{margin:0;font-size:1.9rem;font-weight:800;letter-spacing:-1px}
-header p{margin:.4rem auto 0;color:var(--muted);max-width:560px;font-size:.95rem;line-height:1.5}
-main{max-width:860px;margin:0 auto;padding:1.5rem 1rem 4rem}
-.chips{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin-bottom:1.75rem}
-.chip{border:2px solid #e2e8f0;background:#fff;color:var(--muted);font:600 .85rem 'Inter',sans-serif;padding:.5rem 1rem;border-radius:9999px;cursor:pointer}
-.chip.active{border-color:var(--accent);color:var(--accent);background:rgba(33,131,180,.08)}
-.day{font-size:.9rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:2rem 0 .9rem;display:flex;align-items:center;gap:1rem}
-.day::after{content:'';height:1px;background:#e2e8f0;flex:1}
-.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem}
-.slot{background:#fff;border:2px solid #e2e8f0;border-radius:var(--radius);padding:.9rem 1rem;text-align:left;cursor:pointer;font-family:inherit;transition:.15s}
-.slot:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 16px rgba(0,0,0,.06)}
-.slot .t{font-weight:800;font-size:1.05rem;color:var(--text)}
-.slot .f{font-size:.8rem;font-weight:600;color:var(--accent);margin-top:.15rem}
-.card{background:#fff;border-radius:var(--radius);padding:1.75rem;box-shadow:0 4px 12px rgba(0,0,0,.04);border:1px solid #f1f5f9}
-.empty{text-align:center;color:var(--muted);font-weight:600;padding:3rem 1rem;line-height:1.6}
-.summary{background:#f8fafc;border:1px solid #e2e8f0;border-left:4px solid var(--accent);border-radius:8px;padding:.9rem 1.1rem;margin-bottom:1.25rem}
-.summary b{display:block;font-size:1.05rem}
-.summary span{color:var(--muted);font-size:.9rem}
-label{display:block;font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:1rem 0 .35rem}
-input,textarea{width:100%;border:2px solid #e2e8f0;border-radius:8px;padding:.7rem .9rem;font:500 1rem 'Inter',sans-serif;color:var(--text);background:#fff}
-input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(33,131,180,.15)}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5}
+button{font-family:inherit}
+:focus-visible{outline:3px solid rgba(33,131,180,.45);outline-offset:2px}
+header.top{background:#fff;border-top:5px solid var(--accent);padding:1.6rem 1rem 1.4rem;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.eyebrow{font-size:.75rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent)}
+header.top h1{margin:.25rem 0 0;font-size:1.9rem;font-weight:800;letter-spacing:-1px}
+header.top p{margin:.5rem auto 0;color:var(--muted);max-width:620px;font-size:.95rem}
+.wrap{max-width:1040px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:1.5rem;align-items:start}
+.layout.single{grid-template-columns:minmax(0,720px);justify-content:center}
+.card{background:var(--card);border:1px solid #f1f5f9;border-radius:var(--radius);box-shadow:0 4px 14px rgba(0,0,0,.04);padding:1.75rem}
+h2{margin:0 0 .35rem;font-size:1.35rem;font-weight:800;letter-spacing:-.4px}
+.sub{margin:0 0 1.5rem;color:var(--muted);font-size:.92rem}
+/* stepper */
+.steps{list-style:none;display:flex;gap:.5rem;padding:0;margin:0 0 1.25rem}
+.steps li{flex:1}
+.steps button{width:100%;background:transparent;border:none;border-top:4px solid var(--line);padding:.6rem 0 0;text-align:left;font-size:.78rem;font-weight:700;color:var(--muted);cursor:default}
+.steps li.done button{border-top-color:var(--accent);color:var(--text);cursor:pointer}
+.steps li.current button{border-top-color:var(--accent);color:var(--accent)}
+.steps .n{display:block;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;opacity:.7}
+/* facility cards */
+.facs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem}
+.fac{background:#fff;border:2px solid var(--line);border-left:6px solid var(--c,#2183b4);border-radius:12px;padding:1rem 1.1rem;text-align:left;cursor:pointer;transition:.15s;display:flex;flex-direction:column;gap:.3rem}
+.fac:hover:not(:disabled){border-color:var(--c);box-shadow:0 8px 18px rgba(0,0,0,.07);transform:translateY(-2px)}
+.fac.sel{background:var(--accent-soft);border-color:var(--c)}
+.fac:disabled{opacity:.55;cursor:not-allowed}
+.fac .nm{font-weight:800;font-size:1.05rem}
+.fac .cap{font-size:.78rem;font-weight:700;color:var(--c)}
+.fac .ds{font-size:.84rem;color:var(--muted);line-height:1.45}
+.fac .nx{margin-top:auto;padding-top:.5rem;font-size:.78rem;font-weight:700;color:var(--green)}
+.fac .nx.none{color:var(--muted);font-weight:600}
+.linkbtn{background:none;border:none;color:var(--accent);font-weight:700;font-size:.88rem;cursor:pointer;padding:.25rem 0;margin-top:1rem}
+table.cmp{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:.75rem}
+table.cmp th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:.5rem;border-bottom:2px solid var(--line)}
+table.cmp td{padding:.55rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+.scrollx{overflow-x:auto}
+/* dates */
+.dates{display:flex;gap:.6rem;overflow-x:auto;padding:.25rem .1rem 1rem;scroll-snap-type:x proximity}
+.date{flex:none;width:84px;scroll-snap-align:start;background:#fff;border:2px solid var(--line);border-radius:12px;padding:.7rem .4rem;text-align:center;cursor:pointer;transition:.15s}
+.date:hover{border-color:var(--accent)}
+.date.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.date .w{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.75}
+.date .d{font-size:1.6rem;font-weight:800;line-height:1.1}
+.date .m{font-size:.75rem;font-weight:600;opacity:.8}
+.date .c{margin-top:.35rem;font-size:.66rem;font-weight:700;opacity:.75}
+/* times */
+.times{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem}
+.time{background:#fff;border:2px solid var(--line);border-radius:10px;padding:.85rem .5rem;font-size:1rem;font-weight:700;cursor:pointer;transition:.15s}
+.time:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.time.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.day-label{font-size:.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin:0 0 .75rem}
+/* form */
+fieldset{border:none;padding:0;margin:0 0 1.5rem}
+legend{font-weight:800;font-size:.98rem;margin-bottom:.6rem;padding:0}
+.radios{display:grid;gap:.55rem}
+.radio{display:flex;gap:.75rem;align-items:center;background:#fff;border:2px solid var(--line);border-radius:10px;padding:.8rem 1rem;cursor:pointer;font-weight:600;font-size:.94rem}
+.radio:hover{border-color:#b6cfe0}
+.radio.sel{border-color:var(--accent);background:var(--accent-soft)}
+.radio input{accent-color:var(--accent);width:18px;height:18px;margin:0}
+label.l{display:block;font-size:.74rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:1rem 0 .35rem}
+label.l .opt{text-transform:none;font-weight:500;letter-spacing:0}
+input.t,textarea.t,select.t{width:100%;border:2px solid var(--line);border-radius:10px;padding:.72rem .95rem;font:500 1rem 'Inter',sans-serif;color:var(--text);background:#fff}
+input.t:focus,textarea.t:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(33,131,180,.15)}
+input.t.bad,textarea.t.bad{border-color:var(--red)}
+.err{color:var(--red);font-size:.8rem;font-weight:600;margin-top:.3rem}
 .hint{font-size:.8rem;color:var(--muted);margin-top:.3rem}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.btn{border:none;border-radius:8px;padding:.85rem 1.5rem;font:700 .95rem 'Inter',sans-serif;cursor:pointer;transition:.15s}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.cond{background:#fafbfc;border:1px solid var(--line);border-radius:12px;padding:.25rem 1.1rem 1.1rem;margin-top:1rem}
+.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
+.btn{border:none;border-radius:10px;padding:.9rem 1.6rem;font-size:.95rem;font-weight:800;cursor:pointer;transition:.15s}
 .btn:disabled{opacity:.6;cursor:wait}
 .btn-primary{background:var(--accent);color:#fff}
-.btn-ghost{background:#fff;color:var(--text);border:1px solid #cbd5e0}
+.btn-primary:hover:not(:disabled){background:#1a6e96}
+.btn-ghost{background:#fff;color:var(--text);border:2px solid var(--line)}
 .btn-danger{background:#fff;color:var(--red);border:2px solid var(--red)}
-.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem}
-.msg{border-radius:8px;padding:1rem 1.1rem;font-size:.92rem;line-height:1.5;margin-bottom:1.25rem}
-.msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem;align-items:center}
+.msg{border-radius:10px;padding:.9rem 1.1rem;font-size:.9rem;line-height:1.5;margin-bottom:1.25rem}
 .msg.warn{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.msg.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
 .msg.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
-.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:.3rem .8rem;border-radius:9999px;margin-bottom:1rem}
+.msg.info{background:#f0f7fb;border:1px solid #cfe3ee;color:#1e5a78}
+/* summary */
+.sumcard{position:sticky;top:1rem}
+.sumcard h3{margin:0 0 1rem;font-size:1rem;font-weight:800}
+.srow{padding:.6rem 0;border-bottom:1px solid var(--line)}
+.srow:last-of-type{border-bottom:none}
+.srow .k{font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+.srow .v{font-weight:700;font-size:.95rem}
+.srow .v.empty{font-weight:500;color:#b3adaa}
+.srow .v s{color:var(--muted);font-weight:500}
+.fine{font-size:.78rem;color:var(--muted);line-height:1.5;margin-top:1rem}
+.mini{display:none;background:#fff;border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:10px;padding:.6rem .9rem;margin-bottom:1rem;font-size:.85rem;font-weight:700}
+.pill{display:inline-block;font-size:.75rem;font-weight:800;padding:.3rem .85rem;border-radius:9999px;margin-bottom:1rem}
 .pill.Pending{background:#ffedd5;color:#9a3412}.pill.Confirmed{background:#dcfce7;color:#166534}
-.pill.Declined{background:#fee2e2;color:#991b1b}.pill.Cancelled{background:#e2e8f0;color:#475569}
-.hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
-h2{margin:0 0 1rem;font-size:1.3rem;font-weight:800}
-@media(max-width:560px){.row{grid-template-columns:1fr}}
+.pill.Declined{background:#fee2e2;color:#991b1b}.pill.Cancelled,.pill.Completed,.pill.No-show{background:#e2e8f0;color:#475569}
+.appt{background:#f8fafc;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:1rem 1.2rem;margin:1rem 0}
+.appt b{display:block;font-size:1.1rem}
+.appt span{color:var(--muted);font-size:.92rem}
+.next{margin:1.25rem 0;padding:0;list-style:none;counter-reset:s}
+.next li{counter-increment:s;display:flex;gap:.8rem;margin-bottom:.8rem;font-size:.92rem}
+.next li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem;display:flex;align-items:center;justify-content:center}
+.empty{text-align:center;color:var(--muted);padding:2.5rem 1rem;font-weight:600;line-height:1.7}
+.empty b{color:var(--text)}
+.skel{height:90px;border-radius:12px;background:linear-gradient(90deg,#eceff3,#f6f7f9,#eceff3);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:0 1rem 2.5rem}
+@media(max-width:880px){.layout{grid-template-columns:1fr}.sumcard{display:none}.mini{display:block}}
+@media(max-width:560px){.row2{grid-template-columns:1fr}.card{padding:1.25rem}.steps .n{display:none}.steps button{font-size:.7rem}}
 </style>
 </head>
 <body>
-<header>
-  <h1 id="title">Book a Facility Tour</h1>
-  <p id="sub">Pick a time that suits you and we'll show you around. Our bookings team confirms every request by email.</p>
+<header class="top">
+  <div class="eyebrow" id="club">Mahogany Beach Club</div>
+  <h1 id="title">Request a Facility Tour</h1>
+  <p id="lead">See a space in person before you decide. Choose a facility, pick a time that suits you, and our bookings team will confirm by email.</p>
 </header>
-<main id="app"><div class="empty">Loading available times...</div></main>
+<main class="wrap" id="app"><div class="skel"></div></main>
+<footer id="foot"></footer>
 
 <script>
 /* >>> After deploying the PUBLIC Apps Script web app, paste its URL here <<< */
 var API_URL = 'https://script.google.com/macros/s/AKfycbzJVaehWqWOV_ncv9tz5AkUw9LyfAyxDzT8PDpBNKrdWjCp1dWyL43HjChrcexVB_-JhA/exec';
 
+var COLORS = ['#3176b1', '#51b3d6', '#f07730', '#f2a33c', '#2a9d8f', '#7c5cbf', '#64748b'];
+var TOKEN = new URLSearchParams(location.search).get('t');
+var VISITS = {
+  considering: "I'm considering booking a facility",
+  existing: 'I already have a facility booking',
+  other: "I'm visiting for another reason"
+};
+var PLANS = {
+  private: 'A private event or celebration',
+  community: 'A community or corporate event',
+  exploring: 'Something else / still exploring'
+};
+
+var S = {
+  data: null, view: 'wizard', mode: 'book',          // mode: book | resched
+  step: 1, facility: '', date: '', slotId: '',
+  f: { visitType: '', planning: '', purpose: '', eventDate: '', existingRef: '', name: '', email: '', phone: '', attendees: 1, notes: '', website: '' },
+  errs: {}, banner: '', compare: false, busy: false,
+  booking: null, done: null, cancelAsk: false, cancelReason: ''
+};
+
 var app = document.getElementById('app');
-var params = new URLSearchParams(location.search);
-var TOKEN = params.get('t');
-var state = { data: null, fac: 'All', slot: null, booking: null, mode: TOKEN ? 'manage' : 'book' };
 
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]});}
-function pd(ds){var p=ds.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
-function fDay(ds){return pd(ds).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});}
-function fLong(ds){return pd(ds).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});}
-function fTime(t){var p=t.split(':'),h=+p[0];return ((h%12)||12)+':'+p[1]+' '+(h>=12?'PM':'AM');}
-function range(o){return fTime(o.start)+' – '+fTime(o.end);}
+/* ---------- helpers ---------- */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function pd(ds) { var p = ds.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function fDate(ds, o) { return pd(ds).toLocaleDateString('en-US', o); }
+function fLong(ds) { return fDate(ds, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }); }
+function fMid(ds) { return fDate(ds, { weekday: 'short', month: 'short', day: 'numeric' }); }
+function fTime(t) { var p = t.split(':'), h = +p[0]; return ((h % 12) || 12) + ':' + p[1] + ' ' + (h >= 12 ? 'PM' : 'AM'); }
+function range(o) { return fTime(o.start) + ' – ' + fTime(o.end); }
+function facMeta(name) { return S.data.facilities.filter(function (f) { return f.name === name; })[0]; }
+function colorOf(name) { var i = S.data ? S.data.facilities.findIndex(function (f) { return f.name === name; }) : 0; return COLORS[(i < 0 ? 0 : i) % COLORS.length]; }
+function slotsFor(fac) { return S.data.slots.filter(function (s) { return s.facility === fac && (!S.booking || S.mode !== 'resched' || s.id !== S.booking.slotId); }); }
+function datesFor(fac) { var seen = {}, out = []; slotsFor(fac).forEach(function (s) { if (!seen[s.date]) { seen[s.date] = 0; out.push(s.date); } seen[s.date]++; }); return out.map(function (d) { return { date: d, count: slotsFor(fac).filter(function (s) { return s.date === d; }).length }; }); }
+function timesFor(fac, date) { return slotsFor(fac).filter(function (s) { return s.date === date; }); }
+function slotById(id) { return S.data.slots.filter(function (s) { return s.id === id; })[0]; }
+function chosenSlot() { return S.slotId ? slotById(S.slotId) : null; }
 
-function get(qs){
-  return fetch(API_URL+'?'+qs).then(function(r){return r.json();});
+function api(qs) {
+  return fetch(API_URL + '?' + qs).then(function (r) { return r.json(); });
 }
-function post(body){
-  return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)}).then(function(r){return r.json();});
-}
-function fail(msg){app.innerHTML='<div class="card"><div class="msg err">'+esc(msg)+'</div><div class="actions"><button class="btn btn-ghost" onclick="start()">Back</button></div></div>';}
-
-function start(){
-  state.slot=null;
-  if(API_URL.indexOf('PASTE_')===0){app.innerHTML='<div class="empty">This page is not connected yet. Set API_URL in index.html.</div>';return;}
-  if(state.mode==='manage'){
-    get('action=booking&token='+encodeURIComponent(TOKEN)).then(function(r){
-      if(!r.ok)throw new Error(r.error);
-      state.booking=r.booking;state.phone=r.phone;
-      return get('action=slots');
-    }).then(function(s){state.data=s;renderManage();}).catch(function(e){app.innerHTML='<div class="card"><div class="msg err">'+esc(e.message||e)+'</div></div>';});
-  }else{
-    get('action=slots').then(function(s){if(!s.ok)throw new Error(s.error);state.data=s;renderBook();})
-      .catch(function(e){app.innerHTML='<div class="empty">We could not load tour times right now. Please try again shortly.</div>';});
-  }
+function post(body) {
+  return fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
+    .then(function (r) { return r.json(); })
+    .catch(function () { throw new Error('We could not reach the booking system. Please check your connection and try again.'); });
 }
 
-/* ---- slot picker (shared by booking + reschedule) ---- */
-function pickerHtml(onclickFn){
-  var d=state.data;
-  var chips='<div class="chips"><button class="chip'+(state.fac==='All'?' active':'')+'" onclick="setFac(\'All\')">All</button>'+
-    d.facilities.map(function(f){return '<button class="chip'+(state.fac===f.name?' active':'')+'" data-f="'+esc(f.name)+'" onclick="setFac(this.dataset.f)">'+esc(f.name)+'</button>'}).join('')+'</div>';
-  var slots=d.slots.filter(function(s){return state.fac==='All'||s.facility===state.fac;});
-  if(state.mode==='manage'&&state.booking)slots=slots.filter(function(s){return s.id!==state.booking.slotId;});
-  if(!slots.length)return chips+'<div class="empty">No tour times are open in the next '+d.maxDaysAhead+' days'+(state.fac!=='All'?' for '+esc(state.fac):'')+'.<br>Please check back soon or call us at '+esc(d.phone)+'.</div>';
-  var byDay={},order=[];
-  slots.forEach(function(s){if(!byDay[s.date]){byDay[s.date]=[];order.push(s.date);}byDay[s.date].push(s);});
-  return chips+order.map(function(dt){
-    return '<div class="day">'+esc(fDay(dt))+'</div><div class="slots">'+byDay[dt].map(function(s){
-      return '<button class="slot" onclick="'+onclickFn+'(\''+esc(s.id)+'\')"><div class="t">'+esc(range(s))+'</div><div class="f">'+esc(s.facility)+'</div></button>';
-    }).join('')+'</div>';
-  }).join('');
-}
-function setFac(f){state.fac=f;state.mode==='manage'?renderReschedulePicker():renderBook();}
-function slotById(id){return state.data.slots.filter(function(s){return s.id===id})[0];}
-
-/* ---- new booking ---- */
-function renderBook(){
-  document.getElementById('title').textContent='Book a Facility Tour';
-  app.innerHTML=pickerHtml('chooseSlot');
-}
-function chooseSlot(id){
-  var s=slotById(id);state.slot=s;window.scrollTo(0,0);
-  app.innerHTML='<div class="card"><h2>Your details</h2>'+
-    '<div class="summary"><b>'+esc(s.facility)+'</b><span>'+esc(fLong(s.date))+' · '+esc(range(s))+'</span></div>'+
-    '<form id="bf" novalidate>'+
-    '<label for="name">Full name</label><input id="name" autocomplete="name" required>'+
-    '<div class="row"><div><label for="email">Email</label><input id="email" type="email" autocomplete="email" required></div>'+
-    '<div><label for="phone">Phone</label><input id="phone" type="tel" autocomplete="tel" required></div></div>'+
-    '<label for="guests">How many people will join you? (not counting yourself)</label><input id="guests" type="number" min="0" max="500" value="0" required>'+
-    '<div class="hint">Enter 0 if you are coming alone. This helps us plan the tour.</div>'+
-    '<label for="notes">Anything we should know? (optional)</label><textarea id="notes" rows="3" placeholder="e.g. type of event you are planning, accessibility needs"></textarea>'+
-    '<input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">'+
-    '<div id="err"></div>'+
-    '<div class="actions"><button type="submit" class="btn btn-primary" id="sbtn">Request this tour</button><button type="button" class="btn btn-ghost" onclick="renderBook()">Back</button></div></form></div>';
-  document.getElementById('bf').addEventListener('submit',submitBooking);
-}
-function submitBooking(e){
-  e.preventDefault();
-  var btn=document.getElementById('sbtn'),err=document.getElementById('err');
-  btn.disabled=true;btn.textContent='Sending...';err.innerHTML='';
-  post({action:'book',slotId:state.slot.id,name:val('name'),email:val('email'),phone:val('phone'),guests:val('guests'),notes:val('notes'),website:val('website')})
-  .then(function(r){
-    if(!r.ok)throw new Error(r.error);
-    var b=r.booking;window.scrollTo(0,0);
-    app.innerHTML='<div class="card"><h2>Request received</h2><div class="msg warn"><b>Not confirmed yet.</b> Our bookings team will review your request and email you at <b>'+esc(b.email)+'</b> once your tour is confirmed.</div>'+
-      '<div class="summary"><b>'+esc(b.facility)+'</b><span>'+esc(fLong(b.date))+' · '+esc(range(b))+'</span></div>'+
-      '<p style="color:var(--muted);font-size:.9rem;line-height:1.5">Your time is being held for you. The email includes a link to reschedule or cancel whenever you need.</p>'+
-      '<div class="actions"><button class="btn btn-ghost" onclick="start()">Book another tour</button></div></div>';
-  }).catch(function(ex){
-    err.innerHTML='<div class="msg err">'+esc(ex.message||'Something went wrong. Please try again.')+'</div>';
-    btn.disabled=false;btn.textContent='Request this tour';
+/* ---------- boot ---------- */
+function boot() {
+  if (API_URL.indexOf('PASTE_') === 0) { app.innerHTML = '<div class="card empty">This page is not connected to the booking system yet.<br>Set <b>API_URL</b> in index.html.</div>'; return; }
+  var jobs = [api('action=slots')];
+  if (TOKEN) jobs.push(api('action=booking&token=' + encodeURIComponent(TOKEN)));
+  Promise.all(jobs).then(function (res) {
+    if (!res[0].ok) throw new Error(res[0].error);
+    S.data = res[0];
+    document.getElementById('club').textContent = S.data.clubName;
+    document.getElementById('foot').innerHTML = 'Questions? Call <b>' + esc(S.data.phone) + '</b> or email <a href="mailto:' + esc(S.data.email) + '">' + esc(S.data.email) + '</a>';
+    if (TOKEN) {
+      if (!res[1].ok) { app.innerHTML = '<div class="card"><div class="msg err">' + esc(res[1].error) + '</div><div class="actions"><button class="btn btn-primary" data-act="newTour">Request a new tour</button></div></div>'; return; }
+      S.booking = res[1].booking; S.view = 'manage';
+      document.getElementById('title').textContent = 'Manage Your Tour';
+      document.getElementById('lead').textContent = 'Reschedule or cancel as often as you need.';
+    }
+    render();
+  }).catch(function (e) {
+    app.innerHTML = '<div class="card empty">We could not load tour times right now.<br>Please try again in a moment.<div class="actions" style="justify-content:center"><button class="btn btn-primary" data-act="retry">Try again</button></div></div>';
   });
 }
-function val(id){return document.getElementById(id).value;}
 
-/* ---- manage / reschedule / cancel ---- */
-function renderManage(){
-  var b=state.booking;
-  document.getElementById('title').textContent='Manage Your Tour';
-  document.getElementById('sub').textContent='Reschedule or cancel as often as you need.';
-  var note='';
-  if(b.status==='Pending')note='<div class="msg warn">Your request is awaiting confirmation from our team.</div>';
-  if(b.status==='Confirmed')note='<div class="msg ok">Your tour is confirmed.</div>';
-  if(b.status==='Declined')note='<div class="msg err">This request could not be confirmed.'+(b.declineReason?' Note from our team: '+esc(b.declineReason):'')+'</div>';
-  var acts=b.canModify?'<div class="actions"><button class="btn btn-primary" onclick="renderReschedulePicker()">Reschedule</button><button class="btn btn-danger" onclick="doCancel(this)">Cancel tour</button></div>'
-    :'<div class="actions"><button class="btn btn-primary" onclick="location.href=location.pathname">Book a new tour</button></div>';
-  app.innerHTML='<div class="card"><span class="pill '+esc(b.status)+'">'+esc(b.status)+'</span>'+note+
-    '<div class="summary"><b>'+esc(b.facility)+'</b><span>'+esc(fLong(b.date))+' · '+esc(range(b))+'</span></div>'+
-    '<div style="font-size:.92rem;color:var(--muted);line-height:1.6">'+esc(b.name)+' · '+esc(b.email)+'</div>'+acts+'</div>';
-}
-function renderReschedulePicker(){
-  document.getElementById('title').textContent='Choose a New Time';
-  app.innerHTML='<div class="actions" style="margin:0 0 1.25rem"><button class="btn btn-ghost" onclick="renderManage()">← Back</button></div>'+
-    '<div class="msg warn">Your new time will need to be re-confirmed by our team.</div>'+pickerHtml('confirmReschedule');
-}
-function confirmReschedule(id){
-  var s=slotById(id);
-  if(!confirm('Move your tour to '+fLong(s.date)+', '+range(s)+' ('+s.facility+')?'))return;
-  app.innerHTML='<div class="empty">Updating...</div>';
-  post({action:'reschedule',token:TOKEN,slotId:id}).then(function(r){
-    if(!r.ok)throw new Error(r.error);
-    state.booking=r.booking;window.scrollTo(0,0);renderManage();
-    app.insertAdjacentHTML('afterbegin','<div class="msg ok">Request sent. We will email you once the new time is confirmed.</div>');
-  }).catch(function(e){alert(e.message||e);start();});
-}
-function doCancel(btn){
-  if(!confirm('Cancel this tour?'))return;
-  btn.disabled=true;btn.textContent='Cancelling...';
-  post({action:'cancel',token:TOKEN}).then(function(r){
-    if(!r.ok)throw new Error(r.error);
-    state.booking=r.booking;renderManage();
-  }).catch(function(e){alert(e.message||e);btn.disabled=false;btn.textContent='Cancel tour';});
+/* ---------- render ---------- */
+function render() {
+  if (S.view === 'manage') return renderManage();
+  if (S.view === 'done') return renderDone();
+  renderWizard();
 }
 
-start();
+function stepNames() { return ['Facility', 'Date', 'Time', S.mode === 'resched' ? 'Confirm' : 'Your details']; }
+function reachable(n) { return n === 1 || (n === 2 && S.facility) || (n === 3 && S.facility && S.date) || (n === 4 && S.slotId); }
+
+function renderWizard() {
+  var names = stepNames();
+  var steps = '<ol class="steps">' + names.map(function (nm, i) {
+    var n = i + 1, cls = n === S.step ? 'current' : (n < S.step ? 'done' : '');
+    return '<li class="' + cls + '"><button type="button" ' + (n < S.step && reachable(n) ? 'data-act="goStep" data-arg="' + n + '"' : 'tabindex="-1"') + ' ' + (n === S.step ? 'aria-current="step"' : '') + '><span class="n">Step ' + n + '</span>' + nm + '</button></li>';
+  }).join('') + '</ol>';
+
+  var body = S.step === 1 ? stepFacility() : S.step === 2 ? stepDate() : S.step === 3 ? stepTime() : (S.mode === 'resched' ? stepConfirm() : stepForm());
+  app.innerHTML = '<div class="layout"><div>' + steps + miniSummary() + '<div class="card" id="panel">' + body + '</div></div>' + summaryCard() + '</div>';
+  var h = document.querySelector('#panel h2'); if (h) { h.setAttribute('tabindex', '-1'); }
+}
+
+function miniSummary() {
+  var s = chosenSlot(), parts = [];
+  if (S.facility) parts.push(esc(S.facility));
+  if (S.date) parts.push(esc(fMid(S.date)));
+  if (s) parts.push(esc(fTime(s.start)));
+  return parts.length ? '<div class="mini">' + parts.join(' · ') + '</div>' : '';
+}
+
+function summaryCard() {
+  var s = chosenSlot();
+  function row(k, v) { return '<div class="srow"><div class="k">' + k + '</div><div class="v' + (v ? '' : ' empty') + '">' + (v || 'Not chosen yet') + '</div></div>'; }
+  var cur = (S.mode === 'resched' && S.booking) ? '<div class="srow"><div class="k">Current time</div><div class="v"><s>' + esc(S.booking.facility) + '<br>' + esc(fMid(S.booking.date)) + ', ' + esc(range(S.booking)) + '</s></div></div>' : '';
+  return '<aside class="card sumcard" aria-label="Your tour summary"><h3>Your tour summary</h3>' + cur +
+    row('Facility', S.facility ? esc(S.facility) : '') + row('Date', S.date ? esc(fLong(S.date)) : '') + row('Time', s ? esc(range(s)) : '') +
+    '<p class="fine"><b>Submitting a request does not confirm the tour.</b> Our bookings team will follow up by email. A tour is not a facility rental booking.</p></aside>';
+}
+
+/* Step 1: facility */
+function stepFacility() {
+  var cards = S.data.facilities.map(function (f) {
+    var ds = datesFor(f.name), next = ds[0], c = colorOf(f.name);
+    return '<button type="button" class="fac' + (S.facility === f.name ? ' sel' : '') + '" style="--c:' + c + '" ' + (ds.length ? 'data-act="pickFacility" data-arg="' + esc(f.name) + '"' : 'disabled') + ' aria-pressed="' + (S.facility === f.name) + '">' +
+      '<span class="nm">' + esc(f.name) + '</span>' + (f.capacity ? '<span class="cap">Up to ' + f.capacity + ' guests</span>' : (f.type === 'Outdoor' ? '<span class="cap">Outdoor' + (f.seasonal ? ' · seasonal' : '') + '</span>' : '')) +
+      '<span class="ds">' + esc(f.description) + '</span>' +
+      (next ? '<span class="nx">Next available: ' + esc(fMid(next.date)) + '</span>' : '<span class="nx none">No tour times available right now</span>') + '</button>';
+  }).join('');
+  var cmp = '';
+  if (S.compare) {
+    cmp = '<div class="scrollx"><table class="cmp"><thead><tr><th>Facility</th><th>Capacity</th><th>Size</th><th>Floor</th><th>Next available</th></tr></thead><tbody>' +
+      S.data.facilities.map(function (f) { var d = datesFor(f.name)[0]; return '<tr><td><b>' + esc(f.name) + '</b></td><td>' + (f.capacity ? f.capacity : '–') + '</td><td>' + esc(f.size || '–') + '</td><td>' + esc(f.floor || '–') + '</td><td>' + (d ? esc(fMid(d.date)) : 'None right now') + '</td></tr>'; }).join('') + '</tbody></table></div>';
+  }
+  return '<h2>' + (S.mode === 'resched' ? 'Which facility would you like to see?' : 'Which facility would you like to tour?') + '</h2><p class="sub">Choose one to start. You can book another tour afterwards.</p>' +
+    '<div class="facs">' + cards + '</div><button type="button" class="linkbtn" data-act="toggleCompare">' + (S.compare ? 'Hide comparison' : 'Compare facilities') + '</button>' + cmp +
+    (S.mode === 'resched' ? '<div class="actions"><button class="btn btn-ghost" data-act="cancelResched">Keep my current time</button></div>' : '');
+}
+
+/* Step 2: date */
+function stepDate() {
+  var ds = datesFor(S.facility);
+  if (!ds.length) return noTimes();
+  var chips = ds.map(function (d) {
+    return '<button type="button" class="date' + (S.date === d.date ? ' sel' : '') + '" data-act="pickDate" data-arg="' + d.date + '" aria-pressed="' + (S.date === d.date) + '">' +
+      '<div class="w">' + esc(fDate(d.date, { weekday: 'short' })) + '</div><div class="d">' + pd(d.date).getDate() + '</div><div class="m">' + esc(fDate(d.date, { month: 'short' })) + '</div><div class="c">' + d.count + ' time' + (d.count > 1 ? 's' : '') + '</div></button>';
+  }).join('');
+  return '<h2>When would you like to visit?</h2><p class="sub">Showing days with tour times for <b>' + esc(S.facility) + '</b>, up to ' + S.data.maxDaysAhead + ' days ahead.</p><div class="dates" role="group" aria-label="Available dates">' + chips + '</div>' +
+    '<div class="actions"><button class="btn btn-ghost" data-act="goStep" data-arg="1">← Change facility</button></div>';
+}
+function noTimes() {
+  return '<div class="empty"><b>No tour times are open for ' + esc(S.facility) + ' right now.</b><br>Try another facility, check back soon, or contact our bookings team at <b>' + esc(S.data.phone) + '</b>.</div>' +
+    '<div class="actions" style="justify-content:center"><button class="btn btn-primary" data-act="goStep" data-arg="1">Choose another facility</button></div>';
+}
+
+/* Step 3: time */
+function stepTime() {
+  var ts = timesFor(S.facility, S.date);
+  if (!ts.length) return '<h2>Choose a time</h2><div class="empty">Those times were just taken. Please pick another day.</div><div class="actions"><button class="btn btn-primary" data-act="goStep" data-arg="2">Choose another date</button></div>';
+  return '<h2>Choose a time</h2><p class="sub">All times for <b>' + esc(S.facility) + '</b>. Each tour is a single visit slot.</p>' +
+    '<div class="day-label">' + esc(fLong(S.date)) + '</div><div class="times">' +
+    ts.map(function (t) { return '<button type="button" class="time' + (S.slotId === t.id ? ' sel' : '') + '" data-act="pickTime" data-arg="' + esc(t.id) + '">' + esc(fTime(t.start)) + '</button>'; }).join('') + '</div>' +
+    '<div class="actions"><button class="btn btn-ghost" data-act="goStep" data-arg="2">← Change date</button></div>';
+}
+
+/* Step 4 (reschedule): confirm */
+function stepConfirm() {
+  var s = chosenSlot(), b = S.booking;
+  return '<h2>Confirm your new time</h2><p class="sub">Your new time needs to be re-confirmed by our bookings team.</p>' + (S.banner ? '<div class="msg err">' + esc(S.banner) + '</div>' : '') +
+    '<div class="appt"><span>Current</span><b><s>' + esc(b.facility) + ' · ' + esc(fMid(b.date)) + ', ' + esc(range(b)) + '</s></b></div>' +
+    '<div class="appt" style="border-left-color:var(--green)"><span>New</span><b>' + esc(s.facility) + ' · ' + esc(fMid(s.date)) + ', ' + esc(range(s)) + '</b></div>' +
+    '<div class="actions"><button class="btn btn-primary" data-act="submitResched"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? 'Sending…' : 'Request this time') + '</button><button class="btn btn-ghost" data-act="goStep" data-arg="3">← Back</button></div>';
+}
+
+/* Step 4 (new booking): details form */
+function fieldErr(k) { return S.errs[k] ? '<div class="err" id="e_' + k + '">' + esc(S.errs[k]) + '</div>' : ''; }
+function stepForm() {
+  var f = S.f;
+  var visit = '<fieldset><legend>What best describes your visit?</legend><div class="radios">' + Object.keys(VISITS).map(function (k) {
+    return '<label class="radio' + (f.visitType === k ? ' sel' : '') + '"><input type="radio" name="visitType" value="' + k + '" ' + (f.visitType === k ? 'checked' : '') + ' data-chg="visitType"> ' + esc(VISITS[k]) + '</label>';
+  }).join('') + '</div>' + fieldErr('visitType') + '</fieldset>';
+  return '<h2>Tell us about your tour</h2><p class="sub">Just a few details so our team can prepare for your visit.</p>' +
+    (S.banner ? '<div class="msg err" role="alert">' + esc(S.banner) + '</div>' : '') +
+    '<form id="bf" novalidate>' + visit + '<div id="cond">' + condHtml() + '</div>' +
+    '<fieldset><legend>Your contact information</legend>' +
+    '<label class="l" for="name">Full name *</label><input class="t' + (S.errs.name ? ' bad' : '') + '" id="name" data-inp="name" value="' + esc(f.name) + '" autocomplete="name" placeholder="First and last name">' + fieldErr('name') +
+    '<div class="row2"><div><label class="l" for="email">Email address *</label><input class="t' + (S.errs.email ? ' bad' : '') + '" id="email" type="email" data-inp="email" value="' + esc(f.email) + '" autocomplete="email" placeholder="you@example.com">' + fieldErr('email') + '</div>' +
+    '<div><label class="l" for="phone">Phone number *</label><input class="t' + (S.errs.phone ? ' bad' : '') + '" id="phone" type="tel" data-inp="phone" value="' + esc(f.phone) + '" autocomplete="tel" placeholder="(403) 555-0123">' + fieldErr('phone') + '</div></div>' +
+    '<label class="l" for="attendees">How many people will attend the tour, including you? *</label><input class="t' + (S.errs.attendees ? ' bad' : '') + '" id="attendees" type="number" min="1" max="500" inputmode="numeric" data-inp="attendees" value="' + esc(f.attendees) + '" style="max-width:140px">' +
+    '<div class="hint">Enter 1 if you are coming on your own.</div>' + fieldErr('attendees') + '</fieldset>' +
+    '<label class="l" for="notes">Anything else we should know? <span class="opt">(optional)</span></label><textarea class="t" id="notes" rows="3" data-inp="notes" placeholder="Questions, accessibility needs, or details that will help our team prepare.">' + esc(f.notes) + '</textarea>' +
+    '<input class="hp" id="website" data-inp="website" tabindex="-1" autocomplete="off" aria-hidden="true">' +
+    '<div class="msg info" style="margin-top:1.25rem"><b>This is a tour request, not a rental booking.</b> Submitting it does not confirm the tour or hold a room for an event. We will email you once it is confirmed.</div>' +
+    '<div class="actions"><button type="submit" class="btn btn-primary" id="sbtn"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? 'Sending…' : 'Request this tour') + '</button><button type="button" class="btn btn-ghost" data-act="goStep" data-arg="3">← Back</button></div></form>';
+}
+
+function condHtml() {
+  var f = S.f, h = '';
+  if (f.visitType === 'considering') {
+    h += '<fieldset class="cond"><legend style="margin-top:1rem">What are you planning?</legend><div class="radios">' + Object.keys(PLANS).map(function (k) {
+      return '<label class="radio' + (f.planning === k ? ' sel' : '') + '"><input type="radio" name="planning" value="' + k + '" ' + (f.planning === k ? 'checked' : '') + ' data-chg="planning"> ' + esc(PLANS[k]) + '</label>';
+    }).join('') + '</div>' + fieldErr('planning') +
+      '<label class="l" for="eventDate">Approximate event date <span class="opt">(optional)</span></label><input class="t" type="date" id="eventDate" data-inp="eventDate" value="' + esc(f.eventDate) + '" style="max-width:220px"></fieldset>';
+  } else if (f.visitType === 'existing') {
+    h += '<fieldset class="cond"><legend style="margin-top:1rem">Your existing booking</legend>' +
+      '<label class="l" for="existingRef">Booking confirmation number <span class="opt">(if you have it)</span></label><input class="t" id="existingRef" data-inp="existingRef" value="' + esc(f.existingRef) + '" placeholder="e.g. from your booking confirmation" style="max-width:340px">' +
+      '<label class="l" for="eventDate">Event date <span class="opt">(optional)</span></label><input class="t" type="date" id="eventDate" data-inp="eventDate" value="' + esc(f.eventDate) + '" style="max-width:220px"></fieldset>';
+  } else if (f.visitType === 'other') {
+    h += '<fieldset class="cond"><legend style="margin-top:1rem">Reason for your visit *</legend><input class="t' + (S.errs.purpose ? ' bad' : '') + '" id="purpose" data-inp="purpose" value="' + esc(f.purpose) + '" placeholder="Tell us briefly why you would like to visit">' + fieldErr('purpose') + '</fieldset>';
+  }
+  return h;
+}
+
+/* ---------- validation + submit ---------- */
+function validate() {
+  var f = S.f, e = {};
+  if (!f.visitType) e.visitType = 'Please choose one.';
+  if (f.visitType === 'considering' && !f.planning) e.planning = 'Please choose one.';
+  if (f.visitType === 'other' && f.purpose.trim().length < 3) e.purpose = 'Please tell us the reason for your visit.';
+  if (f.name.trim().length < 2) e.name = 'Please enter your full name.';
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.trim())) e.email = 'Please enter a valid email address.';
+  if (f.phone.replace(/\D/g, '').length < 7) e.phone = 'Please enter a valid phone number.';
+  var n = Math.floor(Number(f.attendees));
+  if (!(n >= 1 && n <= 500)) e.attendees = 'Enter a number from 1 to 500.';
+  return e;
+}
+
+function submitBooking() {
+  S.errs = validate(); S.banner = '';
+  if (Object.keys(S.errs).length) {
+    renderWizard();
+    var first = document.querySelector('.err'); if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
+  }
+  S.busy = true; renderWizard();
+  var f = S.f;
+  post({ action: 'book', slotId: S.slotId, name: f.name, email: f.email, phone: f.phone, attendees: f.attendees, visitType: f.visitType, planning: f.planning, purpose: f.purpose, eventDate: f.eventDate, existingRef: f.existingRef, notes: f.notes, website: f.website })
+    .then(function (r) {
+      if (!r.ok) throw new Error(r.error);
+      S.busy = false; S.done = { kind: 'booked', booking: r.booking }; S.view = 'done'; render(); window.scrollTo(0, 0);
+    }).catch(function (e) { failBack(e); });
+}
+
+function submitResched() {
+  S.busy = true; S.banner = ''; renderWizard();
+  post({ action: 'reschedule', token: TOKEN, slotId: S.slotId }).then(function (r) {
+    if (!r.ok) throw new Error(r.error);
+    S.busy = false; S.booking = r.booking; S.done = { kind: 'rescheduled', booking: r.booking }; S.view = 'done'; render(); window.scrollTo(0, 0);
+  }).catch(function (e) { failBack(e); });
+}
+
+/* If the slot was taken meanwhile, refresh availability and send the person back to pick again. */
+function failBack(e) {
+  S.busy = false;
+  var msg = e && e.message ? e.message : 'Something went wrong. Please try again.';
+  if (/no longer available/i.test(msg)) {
+    api('action=slots').then(function (d) { if (d.ok) S.data = d; S.slotId = ''; S.step = datesFor(S.facility).some(function (x) { return x.date === S.date; }) ? 3 : 2; S.banner = ''; renderWizard(); app.insertAdjacentHTML('afterbegin', '<div class="msg warn">' + esc(msg) + '</div>'); window.scrollTo(0, 0); });
+    return;
+  }
+  S.banner = msg; renderWizard(); window.scrollTo(0, 0);
+}
+
+/* ---------- done / manage ---------- */
+function apptHtml(b) { return '<div class="appt"><b>' + esc(b.facility) + '</b><span>' + esc(fLong(b.date)) + ' · ' + esc(range(b)) + '</span></div>'; }
+
+function renderDone() {
+  var d = S.done, b = d.booking, resched = d.kind === 'rescheduled';
+  document.getElementById('title').textContent = resched ? 'Reschedule Requested' : 'Request Received';
+  app.innerHTML = '<div class="layout single"><div class="card"><div class="msg warn"><b>Not confirmed yet.</b> ' + (resched ? 'We have your new time and will email you at ' : 'Our bookings team will review your request and email you at ') + '<b>' + esc(b.email) + '</b>' + (resched ? ' once it is confirmed.' : ' once your tour is confirmed.') + '</div>' +
+    '<h2>Your requested tour</h2>' + apptHtml(b) +
+    '<h3 style="margin:1.5rem 0 .5rem;font-size:1rem">What happens next</h3><ol class="next">' +
+    '<li><div><b>We review your request.</b> The time is held for you while we do.</div></li>' +
+    '<li><div><b>You get an email.</b> We will confirm the tour, or suggest another time if we cannot accommodate it.</div></li>' +
+    '<li><div><b>Plans change?</b> Your emails include a link to reschedule or cancel at any time.</div></li></ol>' +
+    '<p class="fine">A facility tour is a chance to see the space. It is not a rental booking and does not hold a room for an event.</p>' +
+    '<div class="actions"><button class="btn btn-ghost" data-act="newTour">Request another tour</button></div></div></div>';
+}
+
+function renderManage() {
+  var b = S.booking, note = '';
+  if (b.status === 'Pending') note = '<div class="msg warn">Your request is waiting for confirmation from our bookings team.</div>';
+  if (b.status === 'Confirmed') note = '<div class="msg ok"><b>Your tour is confirmed.</b> We look forward to seeing you.</div>';
+  if (b.status === 'Declined') note = '<div class="msg err">We were not able to confirm this request.' + (b.reason ? ' <b>Note from our team:</b> ' + esc(b.reason) : '') + '</div>';
+  if (b.status === 'Cancelled') note = '<div class="msg info">This tour has been cancelled.</div>';
+  var acts;
+  if (b.canModify) {
+    acts = S.cancelAsk
+      ? '<div class="msg warn" style="margin-top:1.25rem"><b>Cancel this tour?</b> You can tell us why (optional).<textarea class="t" id="creason" rows="2" data-inp="cancelReason" style="margin-top:.6rem" placeholder="Optional reason">' + esc(S.cancelReason) + '</textarea></div>' +
+        '<div class="actions" style="margin-top:0"><button class="btn btn-danger" data-act="doCancel"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? 'Cancelling…' : 'Yes, cancel my tour') + '</button><button class="btn btn-ghost" data-act="keepTour">Keep my tour</button></div>'
+      : '<div class="actions"><button class="btn btn-primary" data-act="startResched">Reschedule</button><button class="btn btn-danger" data-act="askCancel">Cancel tour</button></div>';
+  } else {
+    acts = '<div class="actions"><button class="btn btn-primary" data-act="newTour">Request a new tour</button></div>';
+  }
+  app.innerHTML = '<div class="layout single"><div class="card"><span class="pill ' + esc(b.status) + '">' + esc(b.status) + '</span>' + (S.banner ? '<div class="msg err">' + esc(S.banner) + '</div>' : '') + note + apptHtml(b) +
+    '<p style="color:var(--muted);font-size:.9rem;margin:0">' + esc(b.name) + ' · ' + esc(b.email) + ' · ' + b.attendees + ' attending</p>' + acts +
+    '<p class="fine">A facility tour is not a rental booking.</p></div></div>';
+}
+
+/* ---------- events ---------- */
+var ACT = {
+  retry: function () { location.reload(); },
+  newTour: function () { location.href = location.pathname; },
+  goStep: function (n) { n = +n; if (!reachable(n)) return; S.step = n; S.banner = ''; render(); },
+  toggleCompare: function () { S.compare = !S.compare; renderWizard(); },
+  pickFacility: function (name) {
+    if (S.facility !== name) { S.facility = name; S.date = ''; S.slotId = ''; }
+    S.step = 2; renderWizard();
+  },
+  pickDate: function (d) { if (S.date !== d) S.slotId = ''; S.date = d; S.step = 3; renderWizard(); },
+  pickTime: function (id) { S.slotId = id; S.step = 4; S.banner = ''; renderWizard(); window.scrollTo(0, 0); },
+  submitResched: function () { submitResched(); },
+  startResched: function () {
+    S.mode = 'resched'; S.view = 'wizard'; S.facility = S.booking.facility; S.date = ''; S.slotId = ''; S.step = 2;
+    document.getElementById('title').textContent = 'Choose a New Time'; render();
+  },
+  cancelResched: function () { S.mode = 'book'; S.view = 'manage'; S.step = 1; document.getElementById('title').textContent = 'Manage Your Tour'; render(); },
+  askCancel: function () { S.cancelAsk = true; render(); },
+  keepTour: function () { S.cancelAsk = false; render(); },
+  doCancel: function () {
+    S.busy = true; S.banner = ''; render();
+    post({ action: 'cancel', token: TOKEN, reason: S.cancelReason }).then(function (r) {
+      if (!r.ok) throw new Error(r.error);
+      S.busy = false; S.cancelAsk = false; S.booking = r.booking; render();
+    }).catch(function (e) { S.busy = false; S.banner = e.message; render(); });
+  }
+};
+
+document.addEventListener('click', function (e) {
+  var el = e.target.closest('[data-act]');
+  if (el && ACT[el.dataset.act]) { e.preventDefault(); ACT[el.dataset.act](el.dataset.arg, el); }
+});
+document.addEventListener('change', function (e) {
+  var t = e.target;
+  if (t.dataset.chg === 'visitType') { S.f.visitType = t.value; S.errs.visitType = ''; document.querySelectorAll('input[name=visitType]').forEach(function (r) { r.closest('.radio').classList.toggle('sel', r.checked); }); document.getElementById('cond').innerHTML = condHtml(); }
+  if (t.dataset.chg === 'planning') { S.f.planning = t.value; S.errs.planning = ''; document.querySelectorAll('input[name=planning]').forEach(function (r) { r.closest('.radio').classList.toggle('sel', r.checked); }); var er = document.getElementById('e_planning'); if (er) er.remove(); }
+});
+document.addEventListener('input', function (e) {
+  var k = e.target.dataset.inp; if (!k) return;
+  if (k === 'cancelReason') { S.cancelReason = e.target.value; return; }
+  S.f[k] = e.target.value;
+  if (S.errs[k]) { var v = validate(); if (!v[k]) { delete S.errs[k]; e.target.classList.remove('bad'); var er = document.getElementById('e_' + k); if (er) er.remove(); } }
+});
+document.addEventListener('submit', function (e) { if (e.target.id === 'bf') { e.preventDefault(); submitBooking(); } });
+
+boot();
 </script>
 </body>
 </html>
