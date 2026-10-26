@@ -97,7 +97,6 @@
       <input type="number" id="household" min="1" max="30" value="1" inputmode="numeric">
       <div class="hint">Your spouse or partner, your children, and anyone else who lives with you. You'll be asked for a first name for each person below.</div>
     </div>
-    </div>
 
     <div class="card hidden" id="memberCard">
       <h2>People in your household</h2>
@@ -168,6 +167,16 @@
   function post(body) {
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) })
       .then(r => r.json()).then(j => { if (!j.ok) throw new Error(j.error || 'Something went wrong.'); return j.data; });
+  }
+
+  // Loads the page data, retrying a few times with a random pause if the server is busy.
+  function loadPublicWithRetry(attempt) {
+    attempt = attempt || 0;
+    return loadPublic().catch(err => {
+      if (attempt >= 3) throw err;
+      return new Promise(r => setTimeout(r, 1000 + Math.random() * 2000 * (attempt + 1)))
+        .then(() => loadPublicWithRetry(attempt + 1));
+    });
   }
 
   // ---- page setup
@@ -289,6 +298,18 @@
     loadPublic().then(d => { shows = d.shows || []; if (S.registrationOpen) renderAll(); }).catch(() => {});
   }
 
+  // Submits, and if the server says it is busy, quietly retries a few times with a random pause.
+  function submitWithRetry(payload, attempt) {
+    return post({ action: 'submit', payload: payload }).then(res => {
+      if (!res.results.length && /busy/i.test(res.message || '') && attempt < 4) {
+        $('submit').textContent = 'Still working…';
+        return new Promise(r => setTimeout(r, 1500 + Math.random() * 3000))
+          .then(() => submitWithRetry(payload, attempt + 1));
+      }
+      return res;
+    });
+  }
+
   $('submit').addEventListener('click', () => {
     showError('');
     if ([...document.querySelectorAll('#members input')].some(i => !i.value.trim())) { showError('Please enter a first name for each person in your household.'); return; }
@@ -304,7 +325,7 @@
       portfolio: $('portfolio').checked,
     };
     $('submit').disabled = true; $('submit').textContent = 'Registering…';
-    post({ action: 'submit', payload: payload })
+    submitWithRetry(payload, 0)
       .then(res => {
         $('submit').textContent = 'Register';
         if (!res.results.length) { showError(res.message); updateSubmit(); return; }
@@ -312,14 +333,15 @@
       })
       .catch(() => {
         $('submit').textContent = 'Register'; updateSubmit();
-        showError('Something went wrong. Please try again.');
+        showError('Something went wrong and we could not confirm your registration. Please check your email for a confirmation first. If you try again and it says you are already registered, you are all set.');
       });
   });
 
   function showDone(res) {
+    const allDup = res.results.length > 0 && res.results.every(r => r.status === 'duplicate');
     $('formView').classList.add('hidden');
     $('doneView').classList.remove('hidden');
-    $('doneTitle').textContent = res.ok ? res.message : 'Not registered';
+    $('doneTitle').textContent = res.ok ? res.message : (allDup ? 'Already registered' : 'Not registered');
     $('doneBody').innerHTML = res.results.map(r => {
       const icon = r.status === 'confirmed' ? '✅' : '⚠️';
       return '<div>' + icon + ' <b>' + esc(r.showName || r.showId) + '</b>' +
@@ -328,6 +350,7 @@
     }).join('');
     $('doneNote').textContent = res.ok
       ? 'Party size: ' + res.partySize + '. ' + (res.emailed ? 'A confirmation email is on its way. ' : '') + 'Confirmation # ' + res.regId + '.'
+      : allDup ? 'This email already has a registration for the show(s) above. If you just submitted, you are all set. Check your email for the confirmation.'
       : 'Please go back and choose a different show.';
     window.scrollTo({ top: 0 });
   }
@@ -348,8 +371,12 @@
   if (!API || API.indexOf('PASTE_') === 0) {
     fatal('This page is not connected yet. The address in config.js still needs to be filled in.');
   } else {
-    loadPublic().then(applySettings).catch(() => fatal('Could not load registration. Please refresh the page.'));
-    setInterval(() => { if (S && S.registrationOpen && !$('formView').classList.contains('hidden')) refreshShows(); }, 30000);
+    loadPublicWithRetry().then(applySettings).catch(() => fatal('Could not load registration. Please refresh the page.'));
+    // Poll every ~60-75s (each visitor gets a different interval so requests spread out), and only while the tab is visible.
+    setInterval(() => {
+      if (document.hidden) return;
+      if (S && S.registrationOpen && !$('formView').classList.contains('hidden')) refreshShows();
+    }, 60000 + Math.floor(Math.random() * 15000));
   }
 </script>
 </body>
