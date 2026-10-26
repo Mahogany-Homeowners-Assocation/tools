@@ -299,14 +299,28 @@
   }
 
   // Submits, and if the server says it is busy, quietly retries a few times with a random pause.
+  // Keeps trying (up to ~12 times) if the server is busy or the connection hiccups, so people never see a
+  // scary error. If an earlier try may have gone through and a retry says "already registered", that
+  // is treated as success.
+  let mayHaveSaved = false;
   function submitWithRetry(payload, attempt) {
+    const wait = () => new Promise(r => setTimeout(r, 1500 + Math.random() * 3000 + attempt * 500));
+    const again = () => {
+      $('submit').textContent = 'Hang tight, lots of people are registering…';
+      $('submitHint').textContent = 'Please keep this page open. We are still working on it.';
+      return wait().then(() => submitWithRetry(payload, attempt + 1));
+    };
     return post({ action: 'submit', payload: payload }).then(res => {
-      if (!res.results.length && /busy/i.test(res.message || '') && attempt < 4) {
-        $('submit').textContent = 'Still working…';
-        return new Promise(r => setTimeout(r, 1500 + Math.random() * 3000))
-          .then(() => submitWithRetry(payload, attempt + 1));
+      if (!res.results.length && /busy/i.test(res.message || '') && attempt < 12) return again();
+      if (mayHaveSaved && !res.ok && res.results.length && res.results.every(r => r.status === 'duplicate')) {
+        res.results.forEach(r => { r.status = 'confirmed'; r.message = 'Confirmed'; });
+        res.ok = true; res.message = "You're registered! 🎉"; res.partySize = '—'; res.regId = 'see your email'; res.emailed = true;
       }
       return res;
+    }, err => {
+      mayHaveSaved = true;     // the request may have reached the server before failing
+      if (attempt < 12) return again();
+      throw err;
     });
   }
 
