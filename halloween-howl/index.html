@@ -93,6 +93,9 @@
       </div>
       <label class="f" for="email">Email (for your confirmation)</label>
       <input type="email" id="email" autocomplete="email">
+      <label class="f" for="address">Your Mahogany home address</label>
+      <input type="text" id="address" autocomplete="street-address" maxlength="100" placeholder="Street address">
+      <div class="hint">This event is for Mahogany residents and their guests. Please enter the address of your home in Mahogany.</div>
       <label class="f" for="household">How many people from your household are attending, including you?</label>
       <input type="number" id="household" min="1" max="30" value="1" inputmode="numeric">
       <div class="hint">Your spouse or partner, your children, and anyone else who lives with you. You'll be asked for a first name for each person below.</div>
@@ -326,6 +329,7 @@
 
   $('submit').addEventListener('click', () => {
     showError('');
+    if ($('address').value.trim().length < 5) { showError('Please enter your Mahogany home address.'); return; }
     if ([...document.querySelectorAll('#members input')].some(i => !i.value.trim())) { showError('Please enter a first name for each person in your household.'); return; }
     const payload = {
       name: $('name').value,
@@ -333,6 +337,7 @@
       household: householdCount(),
       householdMembers: [...document.querySelectorAll('#members input')].map(i => i.value),
       email: $('email').value,
+      address: $('address').value,
       guests: [...document.querySelectorAll('#guests input')].map(i => i.value).filter(v => v.trim()),
       showIds: [...selected],
       release: $('release').checked,
@@ -372,7 +377,7 @@
   $('again').addEventListener('click', () => {
     $('doneView').classList.add('hidden');
     $('formView').classList.remove('hidden');
-    $('name').value = ''; $('lastName').value = ''; $('email').value = ''; $('guests').innerHTML = ''; $('members').innerHTML = ''; $('household').value = '1';
+    $('name').value = ''; $('lastName').value = ''; $('email').value = ''; $('address').value = ''; $('guests').innerHTML = ''; $('members').innerHTML = ''; $('household').value = '1';
     $('release').checked = false; $('portfolio').checked = false;   // each household agrees for itself
     selected.clear(); refreshShows(); renderAll();
   });
